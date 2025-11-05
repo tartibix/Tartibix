@@ -1,6 +1,11 @@
+'use client'
+
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
+import MyDayToggle from '@/components/dashboard/MyDayToggle'
+import MyDayOverview from '@/components/dashboard/MyDayOverview'
 
 type Project = {
 	id: string
@@ -108,6 +113,7 @@ const dashboardData = {
 }
 
 export default function DashboardPage() {
+	const [isMyDayOn, setIsMyDayOn] = useState(false)
 	const {
 		kpiProgress,
 		projects,
@@ -121,23 +127,33 @@ export default function DashboardPage() {
 	return (
 		<DashboardShell>
 			<TopBar />
-			<section className="mt-4 flex flex-col gap-3">
-				<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-					<KpiCard progress={kpiProgress} />
-					<OverdueCard overdueCount={taskSummary.overdue} />
-					<TeamWorkloadCard data={teamWorkload} />
-				</div>
+			<div className="mt-4 flex justify-end">
+				<MyDayToggle isOn={isMyDayOn} onToggle={() => setIsMyDayOn(!isMyDayOn)} />
+			</div>
+			
+			{isMyDayOn ? (
+				<section className="mt-4">
+					<MyDayOverview />
+				</section>
+			) : (
+				<section className="mt-4 flex flex-col gap-3">
+					<div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+						<KpiCard progress={kpiProgress} />
+						<OverdueCard overdueCount={taskSummary.overdue} />
+						<TeamWorkloadCard data={teamWorkload} />
+					</div>
 
-				<div className="grid gap-3 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
-					<ProjectTable projects={projects} />
-					<CompanyDashboardCard stats={companyStats} />
-				</div>
+					<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+						<ProjectTable projects={projects} />
+						<CompanyDashboardCard stats={companyStats} />
+					</div>
 
-				<div className="grid gap-3 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
-					<TaskTable tasks={tasks} />
-					<DeadlineCard deadlines={deadlines} />
-				</div>
-			</section>
+					<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+						<TaskTable tasks={tasks} />
+						<DeadlineCard deadlines={deadlines} />
+					</div>
+				</section>
+			)}
 		</DashboardShell>
 	)
 }
@@ -193,22 +209,22 @@ function CompanyDashboardCard({ stats }: { stats: CompanyStat[] }) {
 	const gradient = buildConicGradient(stats, total)
 
 	return (
-		<Card className="flex h-full flex-col gap-4 py-5">
-			<h3 className="font-display text-base font-semibold text-soft-white">
+		<Card className="flex h-full flex-col justify-between gap-4 py-5">
+			<h3 className="font-display text-sm sm:text-base font-semibold text-soft-white">
 				Company-Wide Dashboard
 			</h3>
-			<div className="flex items-center gap-5">
-				<div className="relative grid h-24 w-24 flex-shrink-0 place-items-center">
+			<div className="flex flex-1 flex-col items-center justify-center gap-4 sm:gap-6">
+				<div className="relative grid h-32 w-32 sm:h-40 sm:w-40 flex-shrink-0 place-items-center">
 					<div
-						className="h-24 w-24 rounded-full"
+						className="h-32 w-32 sm:h-40 sm:w-40 rounded-full"
 						style={{ background: gradient }}
 					/>
-					<div className="absolute inset-2.5 grid place-items-center rounded-full bg-surface text-center">
-						<span className="text-2xl font-semibold text-soft-white">{total}</span>
-						<span className="text-[10px] text-muted-foreground/70">Projects</span>
+					<div className="absolute inset-3 sm:inset-4 grid place-items-center rounded-full bg-surface text-center">
+						<span className="text-3xl sm:text-4xl font-semibold text-soft-white">{total}</span>
+						<span className="text-[10px] sm:text-xs text-muted-foreground/70">Projects</span>
 					</div>
 				</div>
-				<ul className="flex-1 space-y-2 text-xs">
+				<ul className="w-full space-y-2 text-xs">
 					{stats.map((stat) => (
 						<li key={stat.label} className="flex items-center justify-between gap-3">
 							<div className="flex items-center gap-2.5">
@@ -262,14 +278,15 @@ function KpiCard({ progress }: { progress: number }) {
 	const offset = circumference * (1 - progress / 100)
 
 	return (
-		<Card className="flex items-center justify-between gap-6 py-5">
+		<Card className="flex items-center justify-between gap-4 py-5">
 			<div className="flex-1">
-				<h3 className="font-display text-2xl font-semibold text-soft-white">KPIs</h3>
-				<p className="mt-3 text-3xl font-bold text-soft-white">{progress}%</p>
-				<p className="mt-1 text-sm text-muted-foreground/70">Progress</p>
+				<h3 className="font-display text-xl sm:text-2xl font-semibold text-soft-white">KPIs</h3>
+				<p className="mt-3 text-2xl sm:text-3xl font-bold text-soft-white">
+					{progress}% <span className="text-xs sm:text-sm font-normal text-muted-foreground/70">Progress</span>
+				</p>
 			</div>
 			<div className="relative flex-shrink-0">
-				<svg width="110" height="110" viewBox="0 0 110 110" className="transform -rotate-90">
+				<svg width="90" height="90" viewBox="0 0 110 110" className="transform -rotate-90 sm:w-[110px] sm:h-[110px]">
 					<circle cx="55" cy="55" r={radius} stroke="#2B2B36" strokeWidth="7" fill="none" />
 					<circle
 						cx="55"
@@ -290,17 +307,17 @@ function KpiCard({ progress }: { progress: number }) {
 
 function OverdueCard({ overdueCount }: { overdueCount: number }) {
 	return (
-		<Card className="flex items-center justify-between gap-6 py-5">
+		<Card className="flex items-center justify-between gap-4 py-5">
 			<div className="flex-1">
-				<h3 className="font-display text-2xl font-semibold text-soft-white">
+				<h3 className="font-display text-xl sm:text-2xl font-semibold text-soft-white">
 					Overdue Tasks
 				</h3>
-				<p className="mt-3 text-3xl font-bold text-soft-white">
-					{overdueCount} <span className="text-lg font-medium text-muted-foreground/70">tasks</span>
+				<p className="mt-3 text-2xl sm:text-3xl font-bold text-soft-white">
+					{overdueCount} <span className="text-base sm:text-lg font-medium text-muted-foreground/70">tasks</span>
 				</p>
 			</div>
-			<div className="grid h-20 w-20 flex-shrink-0 place-items-center rounded-full bg-accent/15 ring-2 ring-accent/10">
-				<CheckIcon className="h-12 w-12 text-accent" />
+			<div className="grid h-16 w-16 sm:h-20 sm:w-20 flex-shrink-0 place-items-center rounded-full bg-accent/15 ring-2 ring-accent/10">
+				<CheckIcon className="h-10 w-10 sm:h-12 sm:w-12 text-accent" />
 			</div>
 		</Card>
 	)
@@ -363,7 +380,7 @@ function DeadlineCard({ deadlines }: { deadlines: Deadline[] }) {
 
 function Card({ children, className = '' }: { children: ReactNode; className?: string }) {
 	return (
-		<section className={`rounded-3xl border border-[#2F303A] bg-surface p-4 shadow-[0_0_10px_rgba(169,223,216,0.25)] ${className}`}>
+		<section className={`rounded-3xl border border-[#2F303A] bg-surface p-4 shadow-[0_0_5px_rgba(169,223,216,0.15)] ${className}`}>
 			{children}
 		</section>
 	)

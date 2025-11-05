@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import type { ComponentType } from 'react'
 
 type IconProps = {
@@ -47,38 +48,73 @@ const navItems: NavItem[] = [
 
 export default function Sidebar() {
 	const pathname = usePathname()
+	const [isOpen, setIsOpen] = useState(false)
 
 	return (
-		<aside className="hidden min-h-screen w-[260px] flex-shrink-0 flex-col border-r border-[#1F2028] bg-night px-6 py-8 text-soft-white lg:flex">
-			<Link href="/" className="block">
-				<Image
-					src="/images/tartibix-logo.svg"
-					alt="Tartibix logo"
-					width={200}
-					height={60}
-					className="h-auto w-36"
-					priority
-				/>
-			</Link>
+		<>
+			{/* Mobile Menu Button */}
+			<button
+				onClick={() => setIsOpen(!isOpen)}
+				className="fixed bottom-6 right-6 z-50 grid h-14 w-14 place-items-center rounded-full bg-accent text-night shadow-lg lg:hidden"
+				aria-label="Toggle menu"
+			>
+				<svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+					{isOpen ? (
+						<path d="M6 18L18 6M6 6l12 12" />
+					) : (
+						<path d="M4 6h16M4 12h16M4 18h16" />
+					)}
+				</svg>
+			</button>
 
-			<nav className="mt-10 space-y-2">
-				{navItems.map((item) => {
-					const isActive = isItemActive(pathname, item.href)
-					return (
-						<SidebarLink key={item.label} item={item} active={isActive} />
-					)
-				})}
-			</nav>
-		</aside>
+			{/* Mobile Overlay */}
+			{isOpen && (
+				<div
+					className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+					onClick={() => setIsOpen(false)}
+				/>
+			)}
+
+			{/* Sidebar */}
+			<aside className={`fixed lg:static inset-y-0 left-0 z-40 min-h-screen w-[260px] flex-shrink-0 flex-col border-r border-[#1F2028] bg-night px-6 py-8 text-soft-white transition-transform duration-300 lg:flex ${
+				isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+			}`}>
+				<Link href="/" className="block" onClick={() => setIsOpen(false)}>
+					<Image
+						src="/images/tartibix-logo.svg"
+						alt="Tartibix logo"
+						width={200}
+						height={60}
+						className="h-auto w-36"
+						priority
+					/>
+				</Link>
+
+				<nav className="mt-10 space-y-2">
+					{navItems.map((item) => {
+						const isActive = isItemActive(pathname, item.href)
+						return (
+							<SidebarLink 
+								key={item.label} 
+								item={item} 
+								active={isActive}
+								onClick={() => setIsOpen(false)}
+							/>
+						)
+					})}
+				</nav>
+			</aside>
+		</>
 	)
 }
 
-function SidebarLink({ item, active }: { item: NavItem; active: boolean }) {
+function SidebarLink({ item, active, onClick }: { item: NavItem; active: boolean; onClick?: () => void }) {
 	const Icon = item.icon
 	return (
 		<Link
 			href={item.href}
 			prefetch
+			onClick={onClick}
 			aria-current={active ? 'page' : undefined}
 			className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
 				active

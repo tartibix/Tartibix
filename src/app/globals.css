@@ -22,3 +22,12 @@ input::placeholder {
 button {
   @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171821];
 }
+
+/* Font utility classes */
+.font-inter {
+  font-family: var(--font-inter), sans-serif;
+}
+
+.font-poppins {
+  font-family: var(--font-poppins), sans-serif;
+}
