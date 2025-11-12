@@ -37,7 +37,11 @@
    - 10.1 [Initial Build](#initial-build)
    - 10.2 [Design Parity Adjustments](#design-parity-adjustments)
    - 10.3 [Top Bar Integration](#top-bar-integration)
-11. [Final Project State](#final-project-state)
+11. [Custom Report Builder Implementation](#custom-report-builder-implementation)
+   - 11.1 [Layout Recreation](#layout-recreation)
+   - 11.2 [Interactive Dropdowns](#interactive-dropdowns)
+   - 11.3 [Shadow and Spacing Refinements](#shadow-and-spacing-refinements)
+12. [Final Project State](#final-project-state)
 
 ---
 
@@ -505,7 +509,44 @@ git push -u origin main
 
 ---
 
-## 11. Final Project State
+## 11. Custom Report Builder Implementation
+
+### 11.1 Layout Recreation
+
+**Objective:** Replace the placeholder `/dashboard/custom-report-builder` view with the production-ready design from Figma.
+
+**Changes Made:**
+- Swapped out the placeholder `PagePlaceholder` for a bespoke layout that mirrors the 1103px artboard dimensions.
+- Centered the content inside a constrained container (`max-w-[1014px]`) and replicated typography, card borders, and teal glow treatments from the reference design.
+- Reused the shared `TopBar` so the section inherits search, notifications, and profile controls without duplicating code.
+
+**Files Modified:** `src/app/dashboard/custom-report-builder/page.tsx`
+
+### 11.2 Interactive Dropdowns
+
+**Objective:** Bring the form fields to life using static data so they are ready for future database wiring.
+
+**Changes Made:**
+- Declared local `reportData` arrays for projects, date ranges, and data types, keeping the data structure ready for eventual API swaps.
+- Implemented custom dropdown components with keyboard dismissal, outside-click handling, active state styling, and animated chevrons.
+- Persisted user selections via React state so the chosen values render immediately in the UI.
+
+**Files Modified:** `src/app/dashboard/custom-report-builder/page.tsx`
+
+### 11.3 Shadow and Spacing Refinements
+
+**Objective:** Fine-tune the section’s atmosphere to match stakeholder feedback on glow intensity and whitespace.
+
+**Changes Made:**
+- Reduced all teal glow shadows (card container, dropdown menus, and PDF button) to subtler opacity values for a flatter, less distractive look.
+- Shortened the card’s minimum height and adjusted internal margins so the Download buttons hug the selects without leaving large gaps.
+- Matched the dropdown chevron size, placeholder tint, and focus rings to the latest Figma tokens for visual parity.
+
+**Files Modified:** `src/app/dashboard/custom-report-builder/page.tsx`
+
+---
+
+## 12. Final Project State
 
 ### File Structure
 ```
@@ -574,29 +615,35 @@ TARTIBIX Platform/
    - Status badges with color coding
    - Interactive hover effects
 
-3. **Document Management Module:**
+3. **Custom Report Builder Module:**
+   - Rebuilt the page from the ground up to mirror the latest Figma artboard
+   - Added static datasets for projects, date ranges, and data types with live selection state
+   - Implemented bespoke dropdown menus with focus handling and active/hover styling
+
+4. **Document Management Module:**
    - Pixel-accurate table view with static data for Name, Category, Version, and Status
    - Upload panel with gradient card, CTA button, and file selector matching the Figma artboard
    - Shared dashboard top bar reused for consistent search, notification, and profile controls
 
-4. **Interactive Features:**
+5. **Interactive Features:**
    - Password visibility toggle on login
    - Hover effects on buttons and cards
    - Focus states for accessibility
 
-5. **Color Scheme:**
+6. **Color Scheme:**
    - Background: `#171821`
    - Accent: `#A9DFD8` (teal)
    - Surface: Dark gray tones
    - Text: Soft white with muted variations
 
-6. **Security:**
+7. **Security:**
    - Sensitive files excluded from version control
    - Environment variables properly configured
    - GitHub push protection passed
 
 ### Total Development Actions
 
+- **Custom Report Builder Page:** 4 iterations (layout recreation, dynamic dropdowns, whitespace tuning, shadow adjustments)
 - **Document Management Page:** 3 iterations (initial build, Figma parity, shared top bar)
 - **Request Page Updates:** 3 iterations (layout build, asset curation, post-review polish)
 - **Dashboard Components:** 8 major updates
@@ -605,7 +652,7 @@ TARTIBIX Platform/
 - **Layout Rearrangements:** 4 card components redesigned
 - **My Day Feature Tasks:** 5 focused iterations (layout, sidebar, data, styling, toggle)
 - **Git Operations:** 10+ commands executed
-- **Files Modified:** 15+ unique files
+- **Files Modified:** 16+ unique files
 - **Security Fixes:** 1 critical issue resolved
 
 ---
@@ -617,11 +664,12 @@ This project successfully transformed from initial implementation to a productio
 ✅ **Optimized dashboard** fitting all content on one page  
 ✅ **Request Page** implemented with data-driven UI matching Figma  
 ✅ **Document Management** screen recreated pixel-for-pixel with static datasets  
+✅ **Custom Report Builder** delivered with interactive static-data dropdowns ready for backend wiring  
 ✅ **Modern, horizontal card layouts** for better space utilization  
 ✅ **Functional login page** with password toggle  
 ✅ **Secure version control** with proper secret management  
 ✅ **Published to GitHub** at https://github.com/tartibix/Tartibix  
-✅ **Complete documentation** for future reference (updated through November 6, 2025)  
+✅ **Complete documentation** for future reference (updated through November 12, 2025)  
 
 **Total Development Time:** Single session  
 **Commits:** 1 initial commit (amended)  
@@ -630,4 +678,4 @@ This project successfully transformed from initial implementation to a productio
 ---
 
 *Document created on November 5, 2025*  
-*Last updated: November 6, 2025*  
+*Last updated: November 12, 2025*
