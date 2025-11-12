@@ -1,15 +1,14 @@
 import DashboardShell from '@/components/dashboard/DashboardShell'
-import PagePlaceholder from '@/components/dashboard/PagePlaceholder'
+import ResourceAllocationScheduler from '@/components/dashboard/ResourceAllocationScheduler'
 import TopBar from '@/components/dashboard/TopBar'
 
 export default function AllocationSchedulerPage() {
 	return (
 		<DashboardShell>
-			<TopBar title="Allocation Scheduler" subtitle="Balance workloads and availability." />
-			<PagePlaceholder
-				title="Resource allocation"
-				description="Bring in calendars, drag-and-drop schedulers, and heatmaps for staffing decisions."
-			/>
+			<div className="mx-auto w-full max-w-[1103px] space-y-6">
+				<TopBar title="Resource Allocation Scheduler" subtitle="Balance workloads and availability." />
+				<ResourceAllocationScheduler />
+			</div>
 		</DashboardShell>
 	)
 }

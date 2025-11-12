@@ -41,7 +41,12 @@
    - 11.1 [Layout Recreation](#layout-recreation)
    - 11.2 [Interactive Dropdowns](#interactive-dropdowns)
    - 11.3 [Shadow and Spacing Refinements](#shadow-and-spacing-refinements)
-12. [Final Project State](#final-project-state)
+12. [Notification & Audit Log Implementation](#notification--audit-log-implementation)
+   - 12.1 [Layout Recreation](#layout-recreation-1)
+   - 12.2 [Static Data Integration](#static-data-integration)
+   - 12.3 [Production Copy Update](#production-copy-update)
+   - 12.4 [Shadow Tuning](#shadow-tuning)
+13. [Final Project State](#final-project-state)
 
 ---
 
@@ -546,7 +551,51 @@ git push -u origin main
 
 ---
 
-## 12. Final Project State
+## 12. Notification & Audit Log Implementation
+
+### 12.1 Layout Recreation
+
+**Objective:** Replace the placeholder view with the pixel-accurate notification screen from Figma.
+
+**Changes Made:**
+- Rebuilt `src/app/dashboard/notifications/page.tsx` to mirror the 1103px dashboard frame, matching typography, spacing, and card hierarchy from the supplied design.
+- Reused `DashboardShell` and `TopBar` for consistent chrome while composing the notifications and audit log cards with the teal glow border treatment.
+- Structured the notifications list and audit table using responsive grids so the layout stays aligned at desktop breakpoints.
+
+**Files Modified:** `src/app/dashboard/notifications/page.tsx`
+
+### 12.2 Static Data Integration
+
+**Objective:** Expose the UI data through reusable structures that can be swapped for live queries later.
+
+**Changes Made:**
+- Introduced `src/lib/notificationsData.ts` exporting typed `NotificationItem` and `AuditLogEntry` collections that mirror the Figma content.
+- Updated the notifications page to consume the shared datasets so cards and tables render from a single source of truth.
+
+**Files Modified:** `src/app/dashboard/notifications/page.tsx`, `src/lib/notificationsData.ts`
+
+### 12.3 Production Copy Update
+
+**Objective:** Replace lorem ipsum placeholders with production-ready messaging.
+
+**Changes Made:**
+- Authored realistic notification copy covering release notes, security events, and collaboration updates to match current product workflows.
+- Enriched audit log entries with specific user names, actions, and timestamps for clearer traceability.
+
+**Files Modified:** `src/lib/notificationsData.ts`
+
+### 12.4 Shadow Tuning
+
+**Objective:** Dial back the teal glow around the notifications card per stakeholder feedback.
+
+**Changes Made:**
+- Reduced the outer shadow to `shadow-[0_0_8px_rgba(169,223,216,0.24)]`, softening the border glow while preserving the overall aesthetic from the design system.
+
+**Files Modified:** `src/app/dashboard/notifications/page.tsx`
+
+---
+
+## 13. Final Project State
 
 ### File Structure
 ```
@@ -595,8 +644,9 @@ TARTIBIX Platform/
     │       ├── PagePlaceholder.tsx
     │       ├── Sidebar.tsx
     │       └── TopBar.tsx
-    ├── lib/
-    │   └── supabaseClient.ts
+   ├── lib/
+   │   ├── notificationsData.ts
+   │   └── supabaseClient.ts
     └── styles/
         └── globals.css
 ```
@@ -625,18 +675,23 @@ TARTIBIX Platform/
    - Upload panel with gradient card, CTA button, and file selector matching the Figma artboard
    - Shared dashboard top bar reused for consistent search, notification, and profile controls
 
-5. **Interactive Features:**
+5. **Notification & Audit Log Module:**
+   - Figma-faithful notifications feed and audit log table rendered via shared dashboard chrome
+   - Static data layer in `src/lib/notificationsData.ts` ready to swap for live services
+   - Softened teal glow on container borders following latest design feedback
+
+6. **Interactive Features:**
    - Password visibility toggle on login
    - Hover effects on buttons and cards
    - Focus states for accessibility
 
-6. **Color Scheme:**
+7. **Color Scheme:**
    - Background: `#171821`
    - Accent: `#A9DFD8` (teal)
    - Surface: Dark gray tones
    - Text: Soft white with muted variations
 
-7. **Security:**
+8. **Security:**
    - Sensitive files excluded from version control
    - Environment variables properly configured
    - GitHub push protection passed
@@ -645,6 +700,7 @@ TARTIBIX Platform/
 
 - **Custom Report Builder Page:** 4 iterations (layout recreation, dynamic dropdowns, whitespace tuning, shadow adjustments)
 - **Document Management Page:** 3 iterations (initial build, Figma parity, shared top bar)
+- **Notification & Audit Log Page:** 4 iterations (layout build, static data extraction, production copy, shadow tuning)
 - **Request Page Updates:** 3 iterations (layout build, asset curation, post-review polish)
 - **Dashboard Components:** 8 major updates
 - **Login Page Updates:** 3 iterations
@@ -664,6 +720,7 @@ This project successfully transformed from initial implementation to a productio
 ✅ **Optimized dashboard** fitting all content on one page  
 ✅ **Request Page** implemented with data-driven UI matching Figma  
 ✅ **Document Management** screen recreated pixel-for-pixel with static datasets  
+✅ **Notification & Audit Log** implemented with shared static data, realistic messaging, and softened card glow  
 ✅ **Custom Report Builder** delivered with interactive static-data dropdowns ready for backend wiring  
 ✅ **Modern, horizontal card layouts** for better space utilization  
 ✅ **Functional login page** with password toggle  
