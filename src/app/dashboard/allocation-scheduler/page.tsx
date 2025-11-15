@@ -1,12 +1,11 @@
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import ResourceAllocationScheduler from '@/components/dashboard/ResourceAllocationScheduler'
-import TopBar from '@/components/dashboard/TopBar'
 
 export default function AllocationSchedulerPage() {
 	return (
 		<DashboardShell>
-			<div className="mx-auto w-full max-w-[1103px] space-y-6">
-				<TopBar title="Resource Allocation Scheduler" subtitle="Balance workloads and availability." />
+			<div className="mx-auto w-full max-w-[1103px] space-y-8">
+				<h1 className="font-display text-[32px] font-medium leading-[1.5em] text-soft-white">Resource Allocation Scheduler</h1>
 				<ResourceAllocationScheduler />
 			</div>
 		</DashboardShell>

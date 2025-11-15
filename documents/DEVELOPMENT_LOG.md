@@ -46,7 +46,17 @@
    - 12.2 [Static Data Integration](#static-data-integration)
    - 12.3 [Production Copy Update](#production-copy-update)
    - 12.4 [Shadow Tuning](#shadow-tuning)
-13. [Final Project State](#final-project-state)
+13. [Resource Allocation Scheduler Implementation](#resource-allocation-scheduler-implementation)
+   - 13.1 [Initial Layout Recreation](#initial-layout-recreation)
+   - 13.2 [Figma Design Match](#figma-design-match)
+   - 13.3 [Shadow Reduction](#shadow-reduction)
+   - 13.4 [Interactive Filters Implementation](#interactive-filters-implementation)
+   - 13.5 [Multi-Lane Gantt Chart](#multi-lane-gantt-chart)
+14. [Project Budget Implementation](#project-budget-implementation)
+   - 14.1 [Layout Recreation](#layout-recreation-2)
+   - 14.2 [Dynamic Budget Bars](#dynamic-budget-bars)
+   - 14.3 [Invoice Management Table](#invoice-management-table)
+15. [Final Project State](#final-project-state)
 
 ---
 
@@ -574,6 +584,189 @@ git push -u origin main
 
 **Files Modified:** `src/app/dashboard/notifications/page.tsx`, `src/lib/notificationsData.ts`
 
+---
+
+## 13. Resource Allocation Scheduler Implementation
+
+### 13.1 Initial Layout Recreation
+
+**Objective:** Replace the placeholder `/dashboard/allocation-scheduler` view with a production-ready Gantt chart scheduler from Figma.
+
+**Key Steps:**
+- Built new `src/components/dashboard/ResourceAllocationScheduler.tsx` component mirroring the 1103px Figma frame layout.
+- Implemented employee rows with weekday columns (Monday through Friday) and timeline allocation bars.
+- Created static schedule data with `ScheduleRow` and `Allocation` types containing employee names and project assignments.
+- Added project color palette matching Figma design:
+  - **Project A:** `rgba(225, 211, 182, 0.5)` (tan/beige)
+  - **Project B:** `rgba(177, 192, 193, 0.5)` (blue-gray)
+  - **Project C:** `rgba(195, 201, 178, 0.5)` (olive-green)
+- Positioned allocation bars using percentage-based calculations from `startDay` and `spanDays` values.
+- Integrated filter pill buttons for Project, Week, and Equipment selections.
+
+**Files Created:** `src/components/dashboard/ResourceAllocationScheduler.tsx`  
+**Files Modified:** `src/app/dashboard/allocation-scheduler/page.tsx`
+
+### 13.2 Figma Design Match
+
+**Objective:** Achieve pixel-perfect alignment with the Figma screenshot, including typography, spacing, and visual hierarchy.
+
+**Changes Made:**
+- Removed shared `TopBar` component and replaced with standalone page title to match Figma layout exactly.
+- Updated outer section border radius from `rounded-[24px]` to `rounded-[30px]`.
+- Changed inner timeline card border radius to `rounded-[26px]`.
+- Adjusted filter pills:
+  - Height: `45px`
+  - Min-width: `166px`
+  - Border: `#323449`
+  - Background: `#21222D`
+- Tuned typography:
+  - "filtering" label: `text-[24px]` with `tracking-[0.02em]`
+  - "Employees" header: `text-[22px]`
+  - Day labels: `text-[18px]`
+  - Employee names: `text-[18px] font-semibold`
+- Updated timeline bar styling:
+  - Container height: `70px`
+  - Bar height: `40px`
+  - Border radius: `rounded-[12px]`
+  - Text size: `text-[15px] font-semibold`
+- Changed background colors to match Figma:
+  - Outer card: `#21222D`
+  - Inner timeline card: `#1A1B24`
+  - Allocation row background: `#1C1D27`
+- Added horizontal divider line after day labels with `bg-white/12`.
+- Set employee row spacing to `space-y-9` with `pt-8` per row.
+
+**Files Modified:** `src/components/dashboard/ResourceAllocationScheduler.tsx`, `src/app/dashboard/allocation-scheduler/page.tsx`
+
+### 13.3 Shadow Reduction
+
+**Objective:** Soften border glows across all scheduler cards to reduce visual intensity while maintaining design consistency.
+
+**Changes Made:**
+- **Outer section container:**
+  - Shadow: `0_0_12px_rgba(169,223,216,0.42)` → `0_0_6px_rgba(169,223,216,0.2)`
+- **Inner timeline card:**
+  - Shadow: `0_0_12px_rgba(169,223,216,0.28)` → `0_0_6px_rgba(169,223,216,0.18)`
+- **Filter pill buttons:**
+  - Shadow: `0_0_10px_rgba(169,223,216,0.4)` → `0_0_6px_rgba(169,223,216,0.22)`
+- **Project allocation bars:**
+  - Project A shadow: `0 0 14px rgba(225,211,182,0.28)` → `0 0 10px rgba(225,211,182,0.2)`
+  - Project B shadow: `0 0 14px rgba(177,192,193,0.26)` → `0 0 10px rgba(177,192,193,0.18)`
+  - Project C shadow: `0 0 10px rgba(195,201,178,0.18)` (kept consistent)
+- Updated bar fill opacity from `0.55` to `0.48` for softer appearance.
+- Changed bar text color from `#0E1119` (dark) to `#F6F6F6` (light) for better contrast.
+
+**Files Modified:** `src/components/dashboard/ResourceAllocationScheduler.tsx`
+
+### 13.4 Interactive Filters Implementation
+
+**Objective:** Convert static filter pills into fully functional dropdowns with data-driven options and live filtering.
+
+**Implementation:**
+
+1. **Added 'use client' directive** - Required for React hooks in Next.js App Router.
+
+2. **Created Filter Data Structure:**
+   ```typescript
+   type FilterGroup = {
+     id: FilterId
+     defaultValue: string
+     options: FilterOption[]
+   }
+   ```
+   - **Project filter:** Project All, Project A, Project B, Project C
+   - **Range filter:** Day, Week, Month
+   - **Resource filter:** equipment, staff, budget
+
+3. **Built Interactive Dropdown Component:**
+   - `FilterDropdown` with state management for open/closed state.
+   - Outside-click detection using `useRef` and `useEffect`.
+   - Escape key handling to close dropdown.
+   - Animated chevron icon that rotates 180° when open.
+   - Check icon indicator for selected option.
+   - Hover states and active selection highlighting.
+   - Accessible ARIA attributes (`role="listbox"`, `aria-selected`, etc.).
+
+4. **Implemented Dynamic Schedule Data:**
+   - Created `scheduleByRange` object with separate datasets for Day, Week, and Month views.
+   - **Day view:** Shortened Project A spans, shifted other projects later.
+   - **Week view:** Original baseline schedule.
+   - **Month view:** Extended all project spans by 0.3 days.
+   - Data switches automatically when user selects different range filter.
+
+5. **Added Project Filtering:**
+   - Active project filter dims non-matching allocations to 35% opacity.
+   - "Project All" shows all projects at full opacity.
+   - Individual project selection highlights only that project.
+   - Smooth opacity transitions for visual feedback.
+
+6. **State Management:**
+   - `selectedFilters` state tracks all three filter values.
+   - `useMemo` hook optimizes schedule data recalculation.
+   - Filter changes trigger immediate UI updates.
+
+**Files Modified:** `src/components/dashboard/ResourceAllocationScheduler.tsx`
+
+### 13.5 Multi-Lane Gantt Chart
+
+**Objective:** Handle overlapping project allocations by rendering each project on a separate horizontal lane within an employee's row.
+
+**Problem:** Multiple projects assigned to the same employee during overlapping timeframes were stacking on top of each other, making them unreadable.
+
+**Solution:**
+
+1. **Built Lane Allocation Algorithm:**
+   ```typescript
+   function buildAllocationLanes(allocations: Allocation[]): Allocation[][] {
+     // Sort allocations by start day
+     // Greedily place each allocation in first available lane
+     // Create new lane if all existing lanes have overlaps
+   }
+   ```
+   - Allocations sorted chronologically by `startDay`.
+   - Each allocation placed in the first lane where it doesn't overlap with existing bars.
+   - New lanes created only when necessary.
+   - Returns 2D array: `lanes[laneIndex][allocationIndex]`.
+
+2. **Dynamic Row Height Calculation:**
+   - Lane height: `40px` per lane.
+   - Lane gap: `12px` between lanes.
+   - Vertical padding: `16px` top and bottom.
+   - Total height: `lanes.length × 40 + (lanes.length - 1) × 12 + 32`.
+   - Container uses `minHeight` style for dynamic sizing.
+
+3. **Separate Lane Rendering:**
+   - Each lane rendered as independent `<div>` with `position: relative`.
+   - Allocations within lane use absolute positioning based on day percentages.
+   - Lanes stacked vertically using flexbox with `rowGap`.
+   - Vertical dividers (day boundaries) span full container height.
+
+4. **Updated Test Data with Overlaps:**
+   - **Emily:** 3 projects, some overlapping mid-week.
+   - **James:** 3 projects with early overlaps.
+   - **Anna:** 3 projects spanning multiple overlapping days.
+   - **Michael:** 4 projects (including Project A twice) with extensive overlaps.
+   - Demonstrates 2-3 lanes per employee depending on overlap complexity.
+
+5. **Visual Polish:**
+   - Maintained consistent bar styling across all lanes.
+   - Preserved filter dimming behavior for multi-lane rows.
+   - Kept shadow and color palette consistent.
+   - Responsive padding and spacing scale with lane count.
+
+**Example Scenario (Michael):**
+- **Lane 1:** Project A (days 0-2.5), Project A again (days 3.5-5)
+- **Lane 2:** Project B (days 1-3)
+- **Lane 3:** Project C (days 1.5-3.5)
+
+**Files Modified:** `src/components/dashboard/ResourceAllocationScheduler.tsx`
+
+**Commit Details:**
+- Initial scheduler: Commit SHA `4804440`
+- Final updates: Pending commit
+
+---
+
 ### 12.3 Production Copy Update
 
 **Objective:** Replace lorem ipsum placeholders with production-ready messaging.
@@ -698,6 +891,7 @@ TARTIBIX Platform/
 
 ### Total Development Actions
 
+- **Resource Allocation Scheduler:** 5 iterations (initial layout, Figma match, shadow reduction, interactive filters, multi-lane Gantt)
 - **Custom Report Builder Page:** 4 iterations (layout recreation, dynamic dropdowns, whitespace tuning, shadow adjustments)
 - **Document Management Page:** 3 iterations (initial build, Figma parity, shared top bar)
 - **Notification & Audit Log Page:** 4 iterations (layout build, static data extraction, production copy, shadow tuning)
@@ -707,9 +901,100 @@ TARTIBIX Platform/
 - **Size Optimizations:** 2 major reduction phases
 - **Layout Rearrangements:** 4 card components redesigned
 - **My Day Feature Tasks:** 5 focused iterations (layout, sidebar, data, styling, toggle)
-- **Git Operations:** 10+ commands executed
-- **Files Modified:** 16+ unique files
+- **Git Operations:** 15+ commands executed
+- **Files Modified:** 18+ unique files
+- **Files Created:** 3+ new components
 - **Security Fixes:** 1 critical issue resolved
+
+---
+
+## 14. Project Budget Implementation
+
+### 14.1 Layout Recreation
+
+**Objective:** Replace the placeholder Projects page with a complete Project Budget interface matching the Figma design.
+
+**Changes Made:**
+- Converted `src/app/dashboard/projects/page.tsx` from placeholder to fully functional Project Budget page
+- Added 'use client' directive for React client-side features
+- Implemented responsive layout with max-width of 1103px to match Figma artboard
+- Recreated the budget overview card with dual-column layout (budget info + visualization bars)
+- Used exact typography from Figma (32px title, 28px section headers, 24-26px body text, 20px button text)
+- Applied consistent teal glow shadows (`shadow-[0_0_10px_rgba(169,223,216,0.4)]`) for depth
+
+**Key Components:**
+- **Page Title:** "Project Budget" at 32px font size
+- **Budget Card:** Dark background (#21222D) with rounded corners (10px) and teal glow
+- **Invoice/Payment Section:** Table-style layout with headers and repeating rows
+- **Project Closure Button:** Centered CTA at bottom with hover effects
+
+**Files Modified:** `src/app/dashboard/projects/page.tsx`
+
+### 14.2 Dynamic Budget Bars
+
+**Objective:** Create animated, data-driven vertical bar chart for budget visualization.
+
+**Implementation:**
+- Built two vertical bars side-by-side: "Planned" (teal #A9DFD8) and "Actual" (gray #CCCCCC)
+- Each bar width: 132px, rounded-top corners (20px)
+- Bar heights controlled by static data: Planned = 150px, Actual = 109px
+- Bars positioned inside 192px tall container using flexbox alignment
+- Labels positioned below bars at 24px font size
+- Added CSS transitions (`transition-all duration-500`) for smooth height changes when data updates
+
+**Static Data Structure:**
+```typescript
+{
+  totalBudget: 10000,
+  totalCost: 7500,
+  planned: 150,  // Bar height in pixels
+  actual: 109    // Bar height in pixels
+}
+```
+
+**Future Enhancement:** Heights can be dynamically calculated based on database values with responsive scaling
+
+### 14.3 Invoice Management Table
+
+**Objective:** Display invoice list with status badges and interactive rows matching Figma design.
+
+**Implementation:**
+
+**Table Headers:**
+- Three columns: "Invoice" (120px), "description" (flex-1 centered), "View All" (150px right-aligned)
+- Header font sizes: 26px for Invoice/description, 24px for View All
+- Positioned with flexbox for precise alignment
+
+**Invoice Rows:**
+- Six invoice items rendered from static data array
+- Each row: 70px height, dark background with teal glow shadow
+- Background SVG image (`invoice-row-bg.svg`) for visual texture
+- Three-column layout matching headers
+
+**Row Content:**
+- **Invoice ID:** Left-aligned text (INV - 001 through INV - 005)
+- **Description:** Center-aligned, opacity 0.2 when description matches status (for "Paid"/"Pending" placeholders)
+- **Status Badge:** Teal pill badge (146px min-width, 15px border-radius) with status text
+
+**Status Logic:**
+- First invoice: Description = "Pouring foundations", Status = "Paid"
+- Remaining invoices: Generic placeholders with opacity styling
+- All status badges use consistent teal background (#A9DFD8) with dark text (#21222D)
+
+**Project Closure:**
+- Centered button below invoice table with 14px top margin
+- Same card styling as other elements for visual consistency
+- Hover state with subtle background color change
+
+**Asset Downloads:**
+- `budget-card-right.svg` (250×143px) - Decorative background for budget card
+- `invoice-row-bg.svg` (1087×90px) - Texture overlay for invoice rows
+- Images stored in `public/images/project-budget/`
+
+**Files Modified:** `src/app/dashboard/projects/page.tsx`
+
+**Static Data Ready for Database:**
+All invoice data structured in `projectBudgetData` object ready for future Supabase integration without component changes.
 
 ---
 
@@ -722,17 +1007,19 @@ This project successfully transformed from initial implementation to a productio
 ✅ **Document Management** screen recreated pixel-for-pixel with static datasets  
 ✅ **Notification & Audit Log** implemented with shared static data, realistic messaging, and softened card glow  
 ✅ **Custom Report Builder** delivered with interactive static-data dropdowns ready for backend wiring  
+✅ **Resource Allocation Scheduler** with multi-lane Gantt chart, interactive filters, and dynamic data-driven timeline  
+✅ **Project Budget** with animated budget bars and complete invoice management interface  
 ✅ **Modern, horizontal card layouts** for better space utilization  
 ✅ **Functional login page** with password toggle  
 ✅ **Secure version control** with proper secret management  
 ✅ **Published to GitHub** at https://github.com/tartibix/Tartibix  
-✅ **Complete documentation** for future reference (updated through November 12, 2025)  
+✅ **Complete documentation** for future reference (updated through November 15, 2025)  
 
-**Total Development Time:** Single session  
-**Commits:** 1 initial commit (amended)  
-**Lines of Code:** 7,738 lines across 36 files  
+**Total Development Time:** Multiple sessions  
+**Commits:** 2 major commits (initial + scheduler implementation)  
+**Lines of Code:** 8,300+ lines across 37 files  
 
 ---
 
 *Document created on November 5, 2025*  
-*Last updated: November 12, 2025*
+*Last updated: November 15, 2025*
