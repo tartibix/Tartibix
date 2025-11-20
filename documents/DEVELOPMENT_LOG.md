@@ -5,58 +5,71 @@
 1. [Project Overview](#project-overview)
 2. [Initial Dashboard Design](#initial-dashboard-design)
 3. [Card Layout Improvements](#card-layout-improvements)
-   - 3.1 [KPIs Card Redesign](#kpis-card-redesign)
-   - 3.2 [Overdue Tasks Card Redesign](#overdue-tasks-card-redesign)
-   - 3.3 [Deadlines Card Redesign](#deadlines-card-redesign)
+   3.1 [KPIs Card Redesign](#kpis-card-redesign)
+   3.2 [Overdue Tasks Card Redesign](#overdue-tasks-card-redesign)
+   3.3 [Deadlines Card Redesign](#deadlines-card-redesign)
 4. [Space Optimization](#space-optimization)
-   - 4.1 [First Reduction Phase](#first-reduction-phase)
-   - 4.2 [Second Reduction Phase](#second-reduction-phase)
-   - 4.3 [Content Rearrangement](#content-rearrangement)
-   - 4.4 [Size Increase Adjustments](#size-increase-adjustments)
+   4.1 [First Reduction Phase](#first-reduction-phase)
+   4.2 [Second Reduction Phase](#second-reduction-phase)
+   4.3 [Content Rearrangement](#content-rearrangement)
+   4.4 [Size Increase Adjustments](#size-increase-adjustments)
 5. [Styling Updates](#styling-updates)
-   - 5.1 [Background Color Configuration](#background-color-configuration)
+   5.1 [Background Color Configuration](#background-color-configuration)
 6. [Login Page Improvements](#login-page-improvements)
-   - 6.1 [Content Update](#content-update)
-   - 6.2 [Layout Fix](#layout-fix)
-   - 6.3 [Password Visibility Toggle](#password-visibility-toggle)
+   6.1 [Content Update](#content-update)
+   6.2 [Layout Fix](#layout-fix)
+   6.3 [Password Visibility Toggle](#password-visibility-toggle)
 7. [Version Control Setup](#version-control-setup)
-   - 7.1 [Git Initialization](#git-initialization)
-   - 7.2 [GitHub Repository Setup](#github-repository-setup)
-   - 7.3 [Security Issue Resolution](#security-issue-resolution)
+   7.1 [Git Initialization](#git-initialization)
+   7.2 [GitHub Repository Setup](#github-repository-setup)
+   7.3 [Security Issue Resolution](#security-issue-resolution)
 8. [My Day Feature Overhaul](#my-day-feature-overhaul)
-   - 8.1 [Layout Reconstruction](#layout-reconstruction)
-   - 8.2 [Sidebar Consolidation](#sidebar-consolidation)
-   - 8.3 [Dynamic Data Visuals](#dynamic-data-visuals)
-   - 8.4 [Styling Refinements](#styling-refinements)
-   - 8.5 [Toggle Behavior Update](#toggle-behavior-update)
+   8.1 [Layout Reconstruction](#layout-reconstruction)
+   8.2 [Sidebar Consolidation](#sidebar-consolidation)
+   8.3 [Dynamic Data Visuals](#dynamic-data-visuals)
+   8.4 [Styling Refinements](#styling-refinements)
+   8.5 [Toggle Behavior Update](#toggle-behavior-update)
 9. [Request Page Implementation](#request-page-implementation)
-   - 9.1 [Layout and Data Setup](#layout-and-data-setup)
-   - 9.2 [Asset Management](#asset-management)
-   - 9.3 [Design Refinements](#design-refinements)
+   9.1 [Layout and Data Setup](#layout-and-data-setup)
+   9.2 [Asset Management](#asset-management)
+   9.3 [Design Refinements](#design-refinements)
 10. [Document Management Implementation](#document-management-implementation)
-   - 10.1 [Initial Build](#initial-build)
-   - 10.2 [Design Parity Adjustments](#design-parity-adjustments)
-   - 10.3 [Top Bar Integration](#top-bar-integration)
+   10.1 [Initial Build](#initial-build)
+   10.2 [Design Parity Adjustments](#design-parity-adjustments)
+   10.3 [Top Bar Integration](#top-bar-integration)
 11. [Custom Report Builder Implementation](#custom-report-builder-implementation)
-   - 11.1 [Layout Recreation](#layout-recreation)
-   - 11.2 [Interactive Dropdowns](#interactive-dropdowns)
-   - 11.3 [Shadow and Spacing Refinements](#shadow-and-spacing-refinements)
+   11.1 [Layout Recreation](#layout-recreation)
+   11.2 [Interactive Dropdowns](#interactive-dropdowns)
+   11.3 [Shadow and Spacing Refinements](#shadow-and-spacing-refinements)
 12. [Notification & Audit Log Implementation](#notification--audit-log-implementation)
-   - 12.1 [Layout Recreation](#layout-recreation-1)
-   - 12.2 [Static Data Integration](#static-data-integration)
-   - 12.3 [Production Copy Update](#production-copy-update)
-   - 12.4 [Shadow Tuning](#shadow-tuning)
+   12.1 [Layout Recreation](#layout-recreation-1)
+   12.2 [Static Data Integration](#static-data-integration)
+   12.3 [Production Copy Update](#production-copy-update)
+   12.4 [Shadow Tuning](#shadow-tuning)
 13. [Resource Allocation Scheduler Implementation](#resource-allocation-scheduler-implementation)
-   - 13.1 [Initial Layout Recreation](#initial-layout-recreation)
-   - 13.2 [Figma Design Match](#figma-design-match)
-   - 13.3 [Shadow Reduction](#shadow-reduction)
-   - 13.4 [Interactive Filters Implementation](#interactive-filters-implementation)
-   - 13.5 [Multi-Lane Gantt Chart](#multi-lane-gantt-chart)
+   13.1 [Initial Layout Recreation](#initial-layout-recreation)
+   13.2 [Figma Design Match](#figma-design-match)
+   13.3 [Shadow Reduction](#shadow-reduction)
+   13.4 [Interactive Filters Implementation](#interactive-filters-implementation)
+   13.5 [Multi-Lane Gantt Chart](#multi-lane-gantt-chart)
 14. [Project Budget Implementation](#project-budget-implementation)
-   - 14.1 [Layout Recreation](#layout-recreation-2)
-   - 14.2 [Dynamic Budget Bars](#dynamic-budget-bars)
-   - 14.3 [Invoice Management Table](#invoice-management-table)
-15. [Final Project State](#final-project-state)
+   14.1 [Layout Recreation](#layout-recreation-2)
+   14.2 [Dynamic Budget Bars](#dynamic-budget-bars)
+   14.3 [Invoice Management Table](#invoice-management-table)
+15. [Task Detail Modal Implementation](#task-detail-modal-implementation)
+   15.1 [Layout Recreation](#layout-recreation-3)
+   15.2 [Static Data Source](#static-data-source)
+   15.3 [Progress & Timeline Refinements](#progress--timeline-refinements)
+16. [Final Project State](#final-project-state)
+17. [Task Table Figma Alignment](#task-table-figma-alignment)
+   17.1 [Data Model Realignment](#data-model-realignment)
+   17.2 [Dashboard Table Rebuild](#dashboard-table-rebuild)
+   17.3 [Ava Patel Member Dataset](#ava-patel-member-dataset)
+18. [Task Management Expansion](#task-management-expansion)
+   18.1 [Task Member Enhancements](#task-member-enhancements)
+   18.2 [Task Creation Flow](#task-creation-flow)
+   18.3 [Static Data Extensions](#static-data-extensions)
+   18.4 [Shadow Intensity Adjustments](#shadow-intensity-adjustments)
 
 ---
 
@@ -788,7 +801,44 @@ git push -u origin main
 
 ---
 
-## 13. Final Project State
+## 15. Task Detail Modal Implementation
+
+### 15.1 Layout Recreation
+
+**Objective:** Replace the `/dashboard/tasks` placeholder with the Task Detail Modal shown in Figma.
+
+**Changes Made:**
+- Replaced the `PagePlaceholder` stub with the full modal layout inside `DashboardShell`, matching the 1103px artboard columns.
+- Built overview, task checklist, timeline, and team sections using consistent teal-glow cards to maintain dashboard styling.
+- Ensured responsive behaviour with `xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]`, mirroring the design’s spacing hierarchy.
+
+**Files Modified:** `src/app/dashboard/tasks/page.tsx`
+
+### 15.2 Static Data Source
+
+**Objective:** Feed every dropdown, checklist item, table row, and timeline segment from a single data object until the database hookup ships.
+
+**Implementation:**
+- Added `src/lib/tasksData.ts` exporting typed collections for overview metrics, task items, timeline phases, and both team rosters.
+- Hooked `tasks/page.tsx` into the shared dataset so all copy, avatars, and percentages render dynamically.
+- Seeded the dataset with realistic personas (Ava Patel, Sofia Chen, etc.) and believable progress numbers to strengthen demos.
+
+**Files Created:** `src/lib/tasksData.ts`
+
+### 15.3 Progress & Timeline Refinements
+
+**Objective:** Align progress indicators and timeline segments with the pixel-perfect Figma reference while keeping them data driven.
+
+**Updates:**
+- Styled the overview progress bar with a dedicated accent (`#8FC7C8`) and centered marker glow keyed off the configured percentage (now 62%).
+- Rebuilt the timeline as flex-based segments whose widths derive from phase durations and added connector dots between each milestone.
+- Updated checklist percentages and timeline durations to match the refined dataset (Design 36 days, Launch 18 days, implementation 48% complete).
+
+**Files Modified:** `src/app/dashboard/tasks/page.tsx`, `src/lib/tasksData.ts`
+
+---
+
+## 16. Final Project State
 
 ### File Structure
 ```
@@ -831,17 +881,19 @@ TARTIBIX Platform/
     │       ├── request-page/page.tsx
     │       ├── tasks/page.tsx
     │       └── time-log/page.tsx
-    ├── components/
-    │   └── dashboard/
-    │       ├── DashboardShell.tsx
-    │       ├── PagePlaceholder.tsx
-    │       ├── Sidebar.tsx
-    │       └── TopBar.tsx
+   ├── components/
+   │   └── dashboard/
+   │       ├── DashboardShell.tsx
+   │       ├── PagePlaceholder.tsx
+   │       ├── Sidebar.tsx
+   │       └── TopBar.tsx
    ├── lib/
    │   ├── notificationsData.ts
+   │   ├── reportData.ts
+   │   ├── tasksData.ts
    │   └── supabaseClient.ts
-    └── styles/
-        └── globals.css
+   └── styles/
+      └── globals.css
 ```
 
 ### Key Features Implemented
@@ -884,7 +936,11 @@ TARTIBIX Platform/
    - Surface: Dark gray tones
    - Text: Soft white with muted variations
 
-8. **Security:**
+8. **Task Detail Modal:**
+   - Overview card, checklist, timeline, and personnel lists render from a single static dataset ready for backend wiring
+   - Progress indicators and milestone connectors follow data-driven calculations for immediate realism
+
+9. **Security:**
    - Sensitive files excluded from version control
    - Environment variables properly configured
    - GitHub push protection passed
@@ -901,6 +957,7 @@ TARTIBIX Platform/
 - **Size Optimizations:** 2 major reduction phases
 - **Layout Rearrangements:** 4 card components redesigned
 - **My Day Feature Tasks:** 5 focused iterations (layout, sidebar, data, styling, toggle)
+- **Task Detail Modal:** 4 iterations (page build, data centralisation, progress polish, timeline glow)
 - **Git Operations:** 15+ commands executed
 - **Files Modified:** 18+ unique files
 - **Files Created:** 3+ new components
@@ -1013,13 +1070,84 @@ This project successfully transformed from initial implementation to a productio
 ✅ **Functional login page** with password toggle  
 ✅ **Secure version control** with proper secret management  
 ✅ **Published to GitHub** at https://github.com/tartibix/Tartibix  
-✅ **Complete documentation** for future reference (updated through November 15, 2025)  
+✅ **Task Detail Modal** rebuilt with realistic data powering progress, timeline, and staffing visuals  
+✅ **Task table** aligned 1:1 with Figma using simplified data and styling  
+✅ **Complete documentation** for future reference (updated through November 18, 2025)  
 
 **Total Development Time:** Multiple sessions  
 **Commits:** 2 major commits (initial + scheduler implementation)  
-**Lines of Code:** 8,300+ lines across 37 files  
+**Lines of Code:** ~8,500 lines across 40 files  
+
+---
+
+## 17. Task Table Figma Alignment
+
+### 17.1 Data Model Realignment
+
+**Objective:** Synchronize the task member dataset with the latest Figma task table reference.
+
+**Changes Made:**
+- Refactored `TaskMemberTaskRow` in `src/lib/tasksData.ts` from milestone arrays to flat rows containing `name`, `dueDate`, `assignedTo`, and `status` fields.
+- Replaced the interim popularity/sales experiment with the streamlined dataset reflected in the provided screenshot, duplicating rows as needed to match table density.
+- Confirmed all member records share the updated schema and ran `npx tsc --noEmit` to validate typing after the refactor.
+
+### 17.2 Dashboard Table Rebuild
+
+**Objective:** Recreate the member detail table UI to match the supplied Figma layout exactly.
+
+**Changes Made:**
+- Simplified the grid markup in `src/app/dashboard/tasks/[slug]/page.tsx` to four columns (Task, Due date, Assigned to, Status) with flat row styling.
+- Removed milestone cards and sparkline visualizations, replacing them with compact text rows and right-aligned status badges using the Figma color tokens.
+- Verified appearance against the reference and executed `npm run lint` to keep the project lint-clean after the UI sweep.
+
+### 17.3 Ava Patel Member Dataset
+
+**Objective:** Ensure the Ava Patel view at `src/app/dashboard/tasks/[slug]/page.tsx` renders the exact task list, copy, and status styling requested in the Figma reference.
+
+**Changes Made:**
+- Replaced the previous milestone-driven `ava-patel` payload in `src/lib/tasksData.ts` with eight flat task rows covering the Nelsa, Datascale, Media, and Corlax deliverables shown in the screenshot.
+- Normalized copy and corrected spelling (e.g., "develpoement") to mirror the provided design verbatim, including duplicate task entries to match row count.
+- Mapped each task row to the simplified table by providing `dueDate`, `assignedTo` (set to "Jhon Doe" per artboard), and `status` values (In Progress, Completed, Not Started) so the badges render with the correct colors.
+- Verified the Ava Patel page in the browser after data changes, confirming typography, spacing, and badge alignment against the Figma attachment.
+
+---
+
+## 18. Task Management Expansion
+
+### 18.1 Task Member Enhancements
+
+**Objective:** Refine the member-specific task view so it surfaces richer insights and routes users to the new task creation experience.
+
+**Changes Made:**
+- Linked the "Create new task" CTA in `src/app/dashboard/tasks/[slug]/page.tsx` to a dedicated `/dashboard/tasks/[slug]/create` route using Next.js `Link` for instant navigation.
+- Added a board header section exposing project title, supporting subtitle, ordered status summary chips, and a data-driven completion bar computed from the static dataset.
+- Replaced ad-hoc badge styling with shared metadata so status colours stay consistent across the entire table.
+
+### 18.2 Task Creation Flow
+
+**Objective:** Build the Add Task page shown in Figma and power every control from static data while the backend is pending.
+
+**Changes Made:**
+- Created `src/app/dashboard/tasks/[slug]/create/page.tsx` that reuses `DashboardShell` and `TopBar`, autogenerates static params, and feeds member-specific data into the form component.
+- Implemented `TaskCreateForm` (`src/components/dashboard/TaskCreateForm.tsx`) with responsive cards, dropdowns, date pickers, text inputs, and attachment list, all pre-populated from the member’s static template.
+- Wired cancel and helper links back to the task board, ensuring consistent navigation and matching copy from the Figma layout.
+
+### 18.3 Static Data Extensions
+
+**Objective:** Centralise all task-management copy, options, and styling tokens so the UI stays fully data-driven.
+
+**Changes Made:**
+- Extended `src/lib/tasksData.ts` with new types (`TaskCreationTemplate`, `TaskCreationAttachment`, and `TaskStatusStyle`) plus per-member creation datasets containing projects, task types, defaults, helper copy, and attachment metadata.
+- Exposed `taskStatusStyles` for reusable badge colours and introduced richer copy blocks used throughout the creation form and member views.
+
+### 18.4 Shadow Intensity Adjustments
+
+**Objective:** Soften the teal glow around Task Management cards to match the latest stakeholder feedback.
+
+**Changes Made:**
+- Reduced shadow opacity on all Task Management cards and the new creation flow components (member header, board table, hero cards, and form sections) to achieve a subtler border treatment while preserving depth cues.
 
 ---
 
 *Document created on November 5, 2025*  
-*Last updated: November 15, 2025*
+*Last updated: November 18, 2025*
