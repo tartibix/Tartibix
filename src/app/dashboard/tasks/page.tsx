@@ -20,7 +20,7 @@ export default function TasksPage() {
 				<TopBar title={meta.title} />
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
 					<section className="flex flex-col gap-6">
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.12)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
 							<header className="space-y-3">
 								<p className="text-[15px] font-semibold uppercase tracking-[0.2em] text-[#7D7E84]">Overview</p>
 								<div>
@@ -51,7 +51,7 @@ export default function TasksPage() {
 							</div>
 						</article>
 
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.12)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
 							<header className="flex items-center justify-between">
 								<h2 className="font-display text-[24px] font-semibold text-soft-white">Tasks</h2>
 							</header>
@@ -91,7 +91,7 @@ export default function TasksPage() {
 							</ul>
 						</article>
 
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.12)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
 							<header className="mb-6">
 								<h2 className="font-display text-[24px] font-semibold text-soft-white">Timeline</h2>
 							</header>
@@ -129,7 +129,7 @@ export default function TasksPage() {
 					</section>
 
 					<aside className="space-y-6">
-						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_8px_rgba(169,223,216,0.2)]">
+						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_5px_rgba(169,223,216,0.12)]">
 							<header className="border-b border-white/10 pb-4">
 								<h2 className="font-display text-[22px] font-semibold text-soft-white">Team</h2>
 							</header>
@@ -172,7 +172,7 @@ export default function TasksPage() {
 							</div>
 						</section>
 
-						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_8px_rgba(169,223,216,0.2)]">
+						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_5px_rgba(169,223,216,0.12)]">
 							<header className="border-b border-white/10 pb-4">
 								<h2 className="font-display text-[22px] font-semibold text-soft-white">Cook</h2>
 							</header>

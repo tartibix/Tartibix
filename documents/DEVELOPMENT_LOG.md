@@ -52,10 +52,10 @@
    13.3 [Shadow Reduction](#shadow-reduction)
    13.4 [Interactive Filters Implementation](#interactive-filters-implementation)
    13.5 [Multi-Lane Gantt Chart](#multi-lane-gantt-chart)
-14. [Project Budget Implementation](#project-budget-implementation)
-   14.1 [Layout Recreation](#layout-recreation-2)
-   14.2 [Dynamic Budget Bars](#dynamic-budget-bars)
-   14.3 [Invoice Management Table](#invoice-management-table)
+14. [Project Budget Extraction](#project-budget-extraction)
+   14.1 [Content Removal](#141-content-removal)
+   14.2 [Reusable Backup Component](#142-reusable-backup-component)
+   14.3 [Future Placement Notes](#143-future-placement-notes)
 15. [Task Detail Modal Implementation](#task-detail-modal-implementation)
    15.1 [Layout Recreation](#layout-recreation-3)
    15.2 [Static Data Source](#static-data-source)
@@ -70,6 +70,17 @@
    18.2 [Task Creation Flow](#task-creation-flow)
    18.3 [Static Data Extensions](#static-data-extensions)
    18.4 [Shadow Intensity Adjustments](#shadow-intensity-adjustments)
+19. [Project Management Data Wiring](#project-management-data-wiring)
+   19.1 [Project Static Data Source](#project-static-data-source)
+   19.2 [Program Slider and Charts](#program-slider-and-charts)
+   19.3 [Checklist and Governance Table](#checklist-and-governance-table)
+20. [Dashboard Styling Enhancements](#dashboard-styling-enhancements)
+   20.1 [Projects Typography Alignment](#projects-typography-alignment)
+   20.2 [Shadow Intensity Tuning](#shadow-intensity-tuning)
+21. [Project Management Experience](#project-management-experience)
+   21.1 [Page Construction](#page-construction)
+   21.2 [Static Dataset Architecture](#static-dataset-architecture)
+   21.3 [Interactive Metrics & Controls](#interactive-metrics--controls)
 
 ---
 
@@ -884,6 +895,7 @@ TARTIBIX Platform/
    ├── components/
    │   └── dashboard/
    │       ├── DashboardShell.tsx
+   │       ├── InvoicePaymentSection.tsx
    │       ├── PagePlaceholder.tsx
    │       ├── Sidebar.tsx
    │       └── TopBar.tsx
@@ -940,7 +952,11 @@ TARTIBIX Platform/
    - Overview card, checklist, timeline, and personnel lists render from a single static dataset ready for backend wiring
    - Progress indicators and milestone connectors follow data-driven calculations for immediate realism
 
-9. **Security:**
+9. **Project Budget Extraction:**
+   - Legacy budget view stored in `InvoicePaymentSection.tsx` with reusable sample data
+   - `/dashboard/projects` currently shows a placeholder while the new destination is finalised
+
+10. **Security:**
    - Sensitive files excluded from version control
    - Environment variables properly configured
    - GitHub push protection passed
@@ -965,93 +981,37 @@ TARTIBIX Platform/
 
 ---
 
-## 14. Project Budget Implementation
+## 14. Project Budget Extraction
 
-### 14.1 Layout Recreation
+### 14.1 Content Removal
 
-**Objective:** Replace the placeholder Projects page with a complete Project Budget interface matching the Figma design.
+**Objective:** Clear the `/dashboard/projects` route so the previous Project Budget content can be reused elsewhere.
 
 **Changes Made:**
-- Converted `src/app/dashboard/projects/page.tsx` from placeholder to fully functional Project Budget page
-- Added 'use client' directive for React client-side features
-- Implemented responsive layout with max-width of 1103px to match Figma artboard
-- Recreated the budget overview card with dual-column layout (budget info + visualization bars)
-- Used exact typography from Figma (32px title, 28px section headers, 24-26px body text, 20px button text)
-- Applied consistent teal glow shadows (`shadow-[0_0_10px_rgba(169,223,216,0.4)]`) for depth
-
-**Key Components:**
-- **Page Title:** "Project Budget" at 32px font size
-- **Budget Card:** Dark background (#21222D) with rounded corners (10px) and teal glow
-- **Invoice/Payment Section:** Table-style layout with headers and repeating rows
-- **Project Closure Button:** Centered CTA at bottom with hover effects
+- Replaced the existing budget layout in `src/app/dashboard/projects/page.tsx` with the shared `PagePlaceholder` component.
+- Updated the placeholder copy to clarify that the budget experience has been relocated.
+- Removed all inline budget calculations, invoice data, and decorative assets from the page-level module.
 
 **Files Modified:** `src/app/dashboard/projects/page.tsx`
 
-### 14.2 Dynamic Budget Bars
+### 14.2 Reusable Backup Component
 
-**Objective:** Create animated, data-driven vertical bar chart for budget visualization.
-
-**Implementation:**
-- Built two vertical bars side-by-side: "Planned" (teal #A9DFD8) and "Actual" (gray #CCCCCC)
-- Each bar width: 132px, rounded-top corners (20px)
-- Bar heights controlled by static data: Planned = 150px, Actual = 109px
-- Bars positioned inside 192px tall container using flexbox alignment
-- Labels positioned below bars at 24px font size
-- Added CSS transitions (`transition-all duration-500`) for smooth height changes when data updates
-
-**Static Data Structure:**
-```typescript
-{
-  totalBudget: 10000,
-  totalCost: 7500,
-  planned: 150,  // Bar height in pixels
-  actual: 109    // Bar height in pixels
-}
-```
-
-**Future Enhancement:** Heights can be dynamically calculated based on database values with responsive scaling
-
-### 14.3 Invoice Management Table
-
-**Objective:** Display invoice list with status badges and interactive rows matching Figma design.
+**Objective:** Preserve the legacy Project Budget UI as a reusable building block for future placement.
 
 **Implementation:**
+- Added `src/components/dashboard/InvoicePaymentSection.tsx` that encapsulates the full budget summary card plus invoice/payment table.
+- Bundled the original sample data as `sampleBudgetSummary` and `sampleInvoices` so downstream pages can render the legacy experience immediately.
+- Parameterised the component with optional props (`budgetSummary`, `invoices`, `onProjectClosureClick`) to enable data swaps and callback wiring without touching the layout code.
+- Maintained the original Next.js `Image` usage and bar-height calculations to ensure visual parity with the removed page.
 
-**Table Headers:**
-- Three columns: "Invoice" (120px), "description" (flex-1 centered), "View All" (150px right-aligned)
-- Header font sizes: 26px for Invoice/description, 24px for View All
-- Positioned with flexbox for precise alignment
+**Files Added:** `src/components/dashboard/InvoicePaymentSection.tsx`
 
-**Invoice Rows:**
-- Six invoice items rendered from static data array
-- Each row: 70px height, dark background with teal glow shadow
-- Background SVG image (`invoice-row-bg.svg`) for visual texture
-- Three-column layout matching headers
+### 14.3 Future Placement Notes
 
-**Row Content:**
-- **Invoice ID:** Left-aligned text (INV - 001 through INV - 005)
-- **Description:** Center-aligned, opacity 0.2 when description matches status (for "Paid"/"Pending" placeholders)
-- **Status Badge:** Teal pill badge (146px min-width, 15px border-radius) with status text
-
-**Status Logic:**
-- First invoice: Description = "Pouring foundations", Status = "Paid"
-- Remaining invoices: Generic placeholders with opacity styling
-- All status badges use consistent teal background (#A9DFD8) with dark text (#21222D)
-
-**Project Closure:**
-- Centered button below invoice table with 14px top margin
-- Same card styling as other elements for visual consistency
-- Hover state with subtle background color change
-
-**Asset Downloads:**
-- `budget-card-right.svg` (250×143px) - Decorative background for budget card
-- `invoice-row-bg.svg` (1087×90px) - Texture overlay for invoice rows
-- Images stored in `public/images/project-budget/`
-
-**Files Modified:** `src/app/dashboard/projects/page.tsx`
-
-**Static Data Ready for Database:**
-All invoice data structured in `projectBudgetData` object ready for future Supabase integration without component changes.
+**Next Steps:**
+- Identify the new route or modal that will host the Project Budget experience.
+- Import `InvoicePaymentSection` and provide live data sources (Supabase/API) when ready.
+- Update navigation breadcrumbs once the destination is finalised.
 
 ---
 
@@ -1065,7 +1025,7 @@ This project successfully transformed from initial implementation to a productio
 ✅ **Notification & Audit Log** implemented with shared static data, realistic messaging, and softened card glow  
 ✅ **Custom Report Builder** delivered with interactive static-data dropdowns ready for backend wiring  
 ✅ **Resource Allocation Scheduler** with multi-lane Gantt chart, interactive filters, and dynamic data-driven timeline  
-✅ **Project Budget** with animated budget bars and complete invoice management interface  
+✅ **Project Budget** experience extracted into a reusable component while the page shows a placeholder  
 ✅ **Modern, horizontal card layouts** for better space utilization  
 ✅ **Functional login page** with password toggle  
 ✅ **Secure version control** with proper secret management  
@@ -1149,5 +1109,85 @@ This project successfully transformed from initial implementation to a productio
 
 ---
 
+## 19. Project Management Data Wiring
+
+### 19.1 Project Static Data Source
+
+**Objective:** Ensure every interactive element on `/dashboard/projects` reads from centralized, replaceable static data until the database hookup lands.
+
+**Changes Made:**
+- Created `src/lib/projectManagementData.ts` exporting program options, detailed project records, program performance metrics, health breakdown slices, risk checklist items, and governance review entries.
+- Replaced inline constants in `src/app/dashboard/projects/page.tsx` with imports from the new module so future API wiring only swaps one source of truth.
+
+### 19.2 Program Slider and Charts
+
+**Objective:** Power the hero slider plus visualizations (bars and charts) with live metrics computed from the static dataset.
+
+**Changes Made:**
+- Added a `ProgramPerformanceSlider` component that binds an `<input type="range">` slider to the `programPerformance` array, updating completion, velocity, and budget bars in real time.
+- Introduced `StatusBreakdownChart` to render vertical bars using the `statusBreakdown` slice data so the chart reacts immediately when values change.
+- Updated the summary deck and portfolio insights to consume the shared dataset, guaranteeing sliders, bars, and charts reflect the same figures.
+
+### 19.3 Checklist and Governance Table
+
+**Objective:** Make dropdowns, checkboxes, and tables interactive via the same static data pool.
+
+**Changes Made:**
+- Implemented a `RiskChecklist` component that maps over `riskChecklist` entries and lets users toggle completion states, storing the updates locally.
+- Built a `GovernanceReviews` table with reusable dropdowns (`SelectInput`) that filter `governanceReviews` rows by focus area or quarter without touching the markup.
+- Ensured all dropdowns, checkboxes, and table rows now originate from shared data, simplifying the eventual transition to live queries.
+
+---
+
+## 20. Dashboard Styling Enhancements
+
+### 20.1 Projects Typography Alignment
+
+**Objective:** Keep the Project Management experience visually consistent with Tartibix typography tokens.
+
+**Changes Made:**
+- Audited `src/app/dashboard/projects/page.tsx` and ensured headline, label, and body copy elements reuse the global `font-display` and `font-sans` classes so headings stay in Poppins while descriptive text stays in Inter.
+- Updated summary tiles, program tabs, project cards, milestone labels, team initials, and status badges so every text style inherits the correct font pairing.
+
+### 20.2 Shadow Intensity Tuning
+
+**Objective:** Soften heavy glows on the project toolbar plus Task Management surfaces to let borders lead while preserving depth cues.
+
+**Changes Made:**
+- Reduced custom `shadow-[...]` values across Task Management cards (`/dashboard/tasks`) so list articles, team panels, and aside cards emphasize their borders instead of the teal glow.
+- Applied the same treatment to the Project Management filter bar, program tabs, CTA buttons, summary tiles, meta fields, and project detail cards to match the reference screenshot and keep shadows subordinate to outlines.
+
+---
+
+## 21. Project Management Experience
+
+### 21.1 Page Construction
+
+**Objective:** Replace the placeholder `/dashboard/projects` route with a fully realized Project Management control center that mirrors the stakeholder Figma reference.
+
+**Changes Made:**
+- Built the page inside `src/app/dashboard/projects/page.tsx` with `DashboardShell` and `TopBar`, layering in hero summary tiles, the program filter toolbar, responsive project cards, milestone steppers, and delivery-health sidebars.
+- Composed reusable subcomponents (`SummaryDeck`, `FilterBar`, `ProjectCard`, `MetaField`, `ProjectDescription`, `MilestoneStepper`, `ProjectAside`, `ProgressRing`, `TeamStack`, `StatusBadge`) to keep the layout modular and ready for future data wiring.
+
+### 21.2 Static Dataset Architecture
+
+**Objective:** Capture every project, program, performance metric, risk item, and governance review in a single static module so the UI can hydrate from realistic data before the DB connection ships.
+
+**Changes Made:**
+- Authored `src/lib/projectManagementData.ts` exporting typed structures for `Project`, `ProgramPerformanceMetric`, `StatusBreakdownSlice`, `RiskChecklistItem`, and `GovernanceReviewRow` plus helper option arrays for program, focus, and quarter filters.
+- Seeded the dataset with five flagship programs (Website Redesign, Mobile App Launch, Process Automation) and detailed records: owners, dates, budgets, milestone completion, team initials, health states, and statuses for each project.
+- Documented supporting collections such as the portfolio status breakdown slices, go-live risk checklist, and steering-committee review schedule so charts, checklists, and tables stay in sync.
+
+### 21.3 Interactive Metrics & Controls
+
+**Objective:** Make sliders, charts, dropdowns, and checkboxes react to the static data and reflect in-page state changes.
+
+**Changes Made:**
+- Wired the `SummaryDeck`, portfolio insights, and `ProjectCard` list to memoized selectors that recompute counts, averages, and budget utilization based on the active program tab.
+- Added the `ProgramPerformanceSlider`, `StatusBreakdownChart`, `RiskChecklist`, and `GovernanceReviews` components so range sliders, bar charts, checklist toggles, and dropdown filters pull directly from the shared dataset and update UI metrics instantly.
+- Ensured every interactive control (program pills, focus/quarter selects, risk toggles) stores state locally, ready to be swapped for live Supabase or API calls without rewriting presentation logic.
+
+---
+
 *Document created on November 5, 2025*  
-*Last updated: November 18, 2025*
+*Last updated: November 22, 2025*
