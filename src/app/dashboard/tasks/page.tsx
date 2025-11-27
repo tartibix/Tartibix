@@ -20,7 +20,7 @@ export default function TasksPage() {
 				<TopBar title={meta.title} />
 				<div className="grid gap-6 xl:grid-cols-[minmax(0,2.1fr)_minmax(0,1fr)]">
 					<section className="flex flex-col gap-6">
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_1px_rgba(169,223,216,0.01)]">
 							<header className="space-y-3">
 								<p className="text-[15px] font-semibold uppercase tracking-[0.2em] text-[#7D7E84]">Overview</p>
 								<div>
@@ -40,7 +40,7 @@ export default function TasksPage() {
 											left: `${overview.progress}%`,
 											backgroundColor: '#111724',
 											borderColor: progressColor,
-											boxShadow: `0 0 6px ${progressGlowColor}`,
+											boxShadow: `0 0 2px ${progressGlowColor}`,
 										}}
 									/>
 								</div>
@@ -51,7 +51,7 @@ export default function TasksPage() {
 							</div>
 						</article>
 
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_1px_rgba(169,223,216,0.01)]">
 							<header className="flex items-center justify-between">
 								<h2 className="font-display text-[24px] font-semibold text-soft-white">Tasks</h2>
 							</header>
@@ -67,7 +67,7 @@ export default function TasksPage() {
 													className="peer sr-only"
 													aria-label={`Mark ${task.label} complete`}
 												/>
-												<span className="grid h-5 w-5 place-items-center rounded-[6px] border border-[#3A3B46] bg-[#1B1C24] text-soft-white/40 transition peer-checked:border-accent peer-checked:bg-accent/20 peer-checked:text-accent">
+												<span className="grid h-5 w-5 place-items-center rounded-[6px] border border-[rgba(58,59,70,0.8)] bg-[#1B1C24] text-soft-white/40 transition peer-checked:border-[rgba(169,223,216,0.7)] peer-checked:bg-[rgba(169,223,216,0.18)] peer-checked:text-[rgba(169,223,216,0.85)]">
 													<svg
 														viewBox="0 0 14 14"
 														className="h-3 w-3 opacity-0 transition-opacity peer-checked:opacity-100"
@@ -91,7 +91,7 @@ export default function TasksPage() {
 							</ul>
 						</article>
 
-						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.08)]">
+						<article className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_1px_rgba(169,223,216,0.01)]">
 							<header className="mb-6">
 								<h2 className="font-display text-[24px] font-semibold text-soft-white">Timeline</h2>
 							</header>
@@ -111,7 +111,7 @@ export default function TasksPage() {
 														style={{
 															backgroundColor: timelineBarColor,
 															borderColor: '#1D2532',
-															boxShadow: `0 0 6px ${timelineMarkerGlow}`,
+															boxShadow: `0 0 2px ${timelineMarkerGlow}`,
 														}}
 													/>
 												)}
@@ -129,7 +129,7 @@ export default function TasksPage() {
 					</section>
 
 					<aside className="space-y-6">
-						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_5px_rgba(169,223,216,0.12)]">
+						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_1px_rgba(169,223,216,0.012)]">
 							<header className="border-b border-white/10 pb-4">
 								<h2 className="font-display text-[22px] font-semibold text-soft-white">Team</h2>
 							</header>
@@ -145,9 +145,9 @@ export default function TasksPage() {
 									{teams.primary.members.map((member) => {
 										const avatarSrc = member.image && member.image.trim().length > 0 ? member.image : fallbackAvatar
 										const content = (
-											<div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)] items-center gap-0 rounded-[12px] border border-[#2F303A] bg-[#1B1C24] px-3 py-3 transition-colors hover:border-accent/60 hover:bg-[#1F2029]">
+											<div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_minmax(0,1fr)] items-center gap-0 rounded-[12px] border border-[rgba(47,48,58,0.78)] bg-[#1B1C24] px-3 py-3 transition-colors hover:border-[rgba(169,223,216,0.4)] hover:bg-[#1F2029]">
 												<div className="flex items-center gap-3">
-													<div className="h-10 w-10 overflow-hidden rounded-full border border-[#2F303A]">
+													<div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(47,48,58,0.78)]">
 														<Image src={avatarSrc} alt={`${member.name} avatar`} width={40} height={40} className="h-10 w-10" />
 													</div>
 												</div>
@@ -172,7 +172,7 @@ export default function TasksPage() {
 							</div>
 						</section>
 
-						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_5px_rgba(169,223,216,0.12)]">
+						<section className="rounded-[14px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_1px_rgba(169,223,216,0.012)]">
 							<header className="border-b border-white/10 pb-4">
 								<h2 className="font-display text-[22px] font-semibold text-soft-white">Cook</h2>
 							</header>
@@ -180,8 +180,8 @@ export default function TasksPage() {
 									{teams.secondary.members.map((member, index) => {
 										const avatarSrc = member.image && member.image.trim().length > 0 ? member.image : fallbackAvatar
 										return (
-											<li key={`${member.name}-${index}`} className="flex items-center gap-3 rounded-[12px] border border-[#2F303A] bg-[#1B1C24] px-3 py-3">
-												<div className="h-10 w-10 overflow-hidden rounded-full border border-[#2F303A]">
+											<li key={`${member.name}-${index}`} className="flex items-center gap-3 rounded-[12px] border border-[rgba(47,48,58,0.78)] bg-[#1B1C24] px-3 py-3">
+												<div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(47,48,58,0.78)]">
 													<Image src={avatarSrc} alt={`${member.name} avatar`} width={40} height={40} className="h-10 w-10" />
 												</div>
 												<span className="text-[15px] font-medium text-soft-white">{member.name}</span>

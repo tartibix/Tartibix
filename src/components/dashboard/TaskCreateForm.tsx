@@ -43,7 +43,7 @@ export default function TaskCreateForm({ detail, creationData, priorityOptions }
 	return (
 		<div className="flex flex-col gap-6">
 				<div className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-					<div className="flex h-full flex-col justify-between gap-6 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.07)]">
+					<div className="flex h-full flex-col justify-between gap-6 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.04)]">
 					<div className="flex items-center gap-4">
 						<div className="flex h-16 w-16 items-center justify-center rounded-[18px] border border-[#2F303A] bg-[#1B1C24] text-accent">
 							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-7 w-7">
@@ -69,7 +69,7 @@ export default function TaskCreateForm({ detail, creationData, priorityOptions }
 					</div>
 				</div>
 
-					<div className="flex h-full flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.07)]">
+					<div className="flex h-full flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.04)]">
 					<div className="flex items-center justify-between">
 						<p className="font-display text-[26px] font-semibold text-soft-white">{detail.priorityCard.label}</p>
 						<svg className="h-4 w-4 text-soft-white/80" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -97,7 +97,7 @@ export default function TaskCreateForm({ detail, creationData, priorityOptions }
 				</div>
 			</div>
 
-			<section className="rounded-[26px] border border-[#2F303A] bg-[#21222D] p-8 shadow-[0_0_8px_rgba(169,223,216,0.09)]">
+		<section className="rounded-[26px] border border-[#2F303A] bg-[#21222D] p-8 shadow-[0_0_6px_rgba(169,223,216,0.05)]">
 				<form className="space-y-8" onSubmit={handleSubmit}>
 					<div className="flex flex-col gap-6">
 						<Field label="Project">

@@ -1,29 +1,40 @@
 'use client'
 
-import { useMemo, useState, type ReactNode } from 'react'
+import Image from 'next/image'
+import { useEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react'
+import Link from 'next/link'
 
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
 import {
-  projectManagementData,
-  type GovernanceReviewRow,
-  type Milestone,
-  type ProgramPerformanceMetric,
-  type Project,
-  type RiskChecklistItem,
-  type StatusBreakdownSlice,
-} from '@/lib/projectManagementData'
+  projectCreateFlowData,
+  type CreateDropdownOption,
+  type CreateTeamMember,
+  type DocumentIconVariant,
+} from '@/lib/projectCreateFlowData'
+import { projectManagementData, type GovernanceReviewRow, type Milestone, type Project } from '@/lib/projectManagementData'
 
-const {
-  programOptions,
-  projects,
-  programPerformance,
-  statusBreakdown,
-  riskChecklist,
-  governanceReviews,
-  focusOptions,
-  quarterOptions,
-} = projectManagementData
+const { programOptions, projects, governanceReviews, focusOptions, quarterOptions } = projectManagementData
+
+type PageMode = 'overview' | 'create'
+
+const { initiativeOptions, templateOptions, documentItems, teamMembers } = projectCreateFlowData
+
+const initialCompletedDocIds = documentItems.filter((item) => item.completed).map((item) => item.id)
+
+const documentIconSrc: Record<DocumentIconVariant, string> = {
+  archive: '/images/projects/documents/archive-book.svg',
+  edit: '/images/projects/documents/edit.svg',
+  note: '/images/projects/documents/note-favorite.svg',
+}
+
+const stepOrder = [
+  { id: 'basic-info', label: 'Basic Info' },
+  { id: 'documents', label: 'Documents' },
+  { id: 'team', label: 'Team' },
+] as const
+
+type StepId = typeof stepOrder[number]['id']
 
 const statusTokens: Record<string, { textClass: string; chipClass: string }> = {
   Execution: { textClass: 'text-[#8CDCC7]', chipClass: 'bg-[#1f3b30]/70 border border-[#315b48]' },
@@ -76,10 +87,23 @@ type Insights = {
 }
 
 export default function ProjectsPage() {
+  const [mode, setMode] = useState<PageMode>('overview')
+
+  return (
+    <DashboardShell>
+      {mode === 'overview' ? (
+        <ProjectsOverview onCreate={() => setMode('create')} />
+      ) : (
+        <CreateProjectFlow onExit={() => setMode('overview')} />
+      )}
+    </DashboardShell>
+  )
+}
+
+function ProjectsOverview({ onCreate }: { onCreate: () => void }) {
   const [selectedProgram, setSelectedProgram] = useState(programOptions[0].value)
   const [selectedFocus, setSelectedFocus] = useState(focusOptions[0])
   const [selectedQuarter, setSelectedQuarter] = useState(quarterOptions[0])
-  const [checklistItems, setChecklistItems] = useState(() => riskChecklist.map((item) => ({ ...item })))
 
   const filteredProjects = useMemo(() => projects.filter((project) => project.program === selectedProgram), [selectedProgram])
 
@@ -101,21 +125,12 @@ export default function ProjectsPage() {
 
   const activeProgramLabel = programOptions.find((option) => option.value === selectedProgram)?.label ?? 'Selected program'
 
-  const handleChecklistToggle = (id: string) => {
-    setChecklistItems((prev) => prev.map((item) => (item.id === id ? { ...item, complete: !item.complete } : item)))
-  }
-
   return (
-    <DashboardShell>
+    <>
       <TopBar title="Project Management" />
       <section className="mt-8 space-y-7">
         <SummaryDeck insights={insights} programLabel={activeProgramLabel} />
-        <FilterBar selectedProgram={selectedProgram} onProgramChange={setSelectedProgram} />
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-          <ProgramPerformanceSlider programs={programPerformance} />
-          <RiskChecklist items={checklistItems} onToggle={handleChecklistToggle} />
-        </div>
-        <StatusBreakdownChart slices={statusBreakdown} />
+        <FilterBar selectedProgram={selectedProgram} onProgramChange={setSelectedProgram} onCreate={onCreate} />
         <GovernanceReviews
           rows={governanceReviews}
           focusOptions={focusOptions}
@@ -133,7 +148,7 @@ export default function ProjectsPage() {
           )}
         </div>
       </section>
-    </DashboardShell>
+    </>
   )
 }
 
@@ -158,172 +173,6 @@ function SummaryDeck({ insights, programLabel }: { insights: Insights; programLa
   )
 }
 
-function ProgramPerformanceSlider({ programs }: { programs: ProgramPerformanceMetric[] }) {
-  const [activeIndex, setActiveIndex] = useState(0)
-
-  if (!programs.length) {
-    return null
-  }
-
-  const boundedIndex = Math.min(activeIndex, programs.length - 1)
-  const activeProgram = programs[boundedIndex]
-  const sliderMax = Math.max(programs.length - 1, 0)
-  const completion = Math.round(activeProgram.completion)
-  const budgetPercent = Math.round((activeProgram.budgetUsed / activeProgram.budgetTotal) * 100)
-
-  return (
-    <div className="rounded-[26px] border border-[#2F303A] bg-night px-6 py-6 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-[11px] uppercase tracking-[0.3em] text-soft-white/55">Program Focus</p>
-          <h3 className="font-display text-2xl font-semibold text-soft-white">{activeProgram.label}</h3>
-          <p className="text-sm text-soft-white/60">Owned by {activeProgram.owners.join(', ')}</p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs uppercase tracking-[0.25em] text-soft-white/55">Velocity</p>
-          <p className="font-display text-3xl font-semibold text-soft-white">{activeProgram.velocity.toFixed(1)}</p>
-          <p className="text-xs text-soft-white/50">sprints / month</p>
-        </div>
-      </div>
-      <div className="mt-6 grid gap-6 md:grid-cols-2">
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-soft-white/55">Completion</p>
-          <div className="mt-3 flex items-end gap-4">
-            <div className="flex-1">
-              <div className="h-2 rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#63FFC9] to-[#70B7FF]" style={{ width: `${completion}%` }} />
-              </div>
-            </div>
-            <span className="font-display text-3xl font-semibold text-soft-white">{completion}%</span>
-          </div>
-          <p className="mt-1 text-xs text-soft-white/50">Timeline confidence {activeProgram.timelineConfidence}%</p>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-[0.25em] text-soft-white/55">Budget Use</p>
-          <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-soft-white/60">
-              <span>Used</span>
-              <span>{budgetPercent}%</span>
-            </div>
-            <div className="mt-2 h-2 rounded-full bg-white/10">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#A9DFD8] to-[#63FFC9]" style={{ width: `${budgetPercent}%` }} />
-            </div>
-            <p className="font-sans mt-2 text-sm font-medium text-soft-white">
-              {moneyFormatter.format(activeProgram.budgetUsed)} / {moneyFormatter.format(activeProgram.budgetTotal)}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="mt-6">
-        <input
-          type="range"
-          min={0}
-          max={sliderMax}
-          value={boundedIndex}
-          onChange={(event) => setActiveIndex(Number(event.target.value))}
-          className="w-full accent-[#A9DFD8]"
-          style={{ accentColor: '#A9DFD8' }}
-          aria-label="Program selection slider"
-        />
-        <div className="mt-3 flex flex-wrap gap-2 text-[10px] uppercase tracking-[0.2em] text-soft-white/60">
-          {programs.map((program, index) => (
-            <button
-              key={program.id}
-              type="button"
-              onClick={() => setActiveIndex(index)}
-              className={`rounded-full border px-3 py-1 font-semibold transition ${
-                index === boundedIndex ? 'border-accent text-soft-white' : 'border-transparent text-soft-white/50 hover:text-soft-white'
-              }`}
-            >
-              {program.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function StatusBreakdownChart({ slices }: { slices: StatusBreakdownSlice[] }) {
-  if (!slices.length) {
-    return null
-  }
-
-  const maxValue = Math.max(...slices.map((slice) => slice.value)) || 1
-
-  return (
-    <div className="rounded-[26px] border border-[#2F303A] bg-night px-6 py-6 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-[11px] uppercase tracking-[0.3em] text-soft-white/55">Portfolio Mix</p>
-          <h3 className="font-display text-2xl font-semibold text-soft-white">Delivery Health Snapshot</h3>
-        </div>
-        <p className="text-sm text-soft-white/60">Counts update automatically as projects shift status.</p>
-      </div>
-      <div className="mt-8 flex flex-wrap items-end gap-6">
-        {slices.map((slice) => {
-          const heightPercent = (slice.value / maxValue) * 100
-          const columnHeight = (140 * heightPercent) / 100
-          return (
-            <div key={slice.label} className="flex min-w-[80px] flex-1 flex-col items-center gap-2 text-center">
-              <div className="flex h-[150px] w-12 items-end justify-center rounded-full bg-white/5">
-                <div
-                  className="w-6 rounded-full"
-                  style={{ height: `${columnHeight}px`, background: slice.color, boxShadow: `0 10px 25px ${slice.color}45` }}
-                />
-              </div>
-              <p className="font-display text-lg font-semibold text-soft-white">{slice.value}</p>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-soft-white/60">{slice.label}</p>
-              <p className="text-[11px] text-soft-white/40">Target {slice.target}</p>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-function RiskChecklist({ items, onToggle }: { items: RiskChecklistItem[]; onToggle: (id: string) => void }) {
-  if (!items.length) {
-    return null
-  }
-
-  return (
-    <div className="rounded-[26px] border border-[#2F303A] bg-night px-6 py-6 shadow-[0_12px_28px_rgba(0,0,0,0.35)]">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-display text-[11px] uppercase tracking-[0.3em] text-soft-white/55">Risk Controls</p>
-          <h3 className="font-display text-2xl font-semibold text-soft-white">Go-Live Checklist</h3>
-        </div>
-        <p className="text-sm text-soft-white/60">Mark items as teams provide evidence.</p>
-      </div>
-      <ul className="mt-4 space-y-3">
-        {items.map((item) => (
-          <li key={item.id} className="flex items-center justify-between gap-3 rounded-[16px] border border-[#2F303A] bg-[#191A24] px-4 py-3">
-            <label htmlFor={`risk-${item.id}`} className="flex flex-1 items-center gap-3 text-sm text-soft-white">
-              <span className="relative inline-flex">
-                <input
-                  type="checkbox"
-                  id={`risk-${item.id}`}
-                  checked={item.complete}
-                  onChange={() => onToggle(item.id)}
-                  className="peer sr-only"
-                />
-                <span className="grid h-5 w-5 place-items-center rounded-md border border-[#3A3B46] bg-night text-soft-white/40 transition peer-checked:border-accent peer-checked:bg-accent/20 peer-checked:text-accent">
-                  <svg viewBox="0 0 14 14" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M3 8 6 10.5 11 4" />
-                  </svg>
-                </span>
-              </span>
-              <span>{item.label}</span>
-            </label>
-            <span className="text-xs text-soft-white/60">{item.owner}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )
-}
 
 function GovernanceReviews({
   rows,
@@ -424,7 +273,7 @@ function StatusChip({ status }: { status: GovernanceReviewRow['status'] }) {
   return <span className={`rounded-full px-3 py-1 text-xs font-display font-semibold ${token.textClass} ${token.chipClass}`}>{status}</span>
 }
 
-function FilterBar({ selectedProgram, onProgramChange }: { selectedProgram: string; onProgramChange: (value: string) => void }) {
+function FilterBar({ selectedProgram, onProgramChange, onCreate }: { selectedProgram: string; onProgramChange: (value: string) => void; onCreate: () => void }) {
   return (
     <div className="rounded-[22px] border border-[#2F303A] bg-surface px-5 py-4 shadow-[0_12px_28px_rgba(0,0,0,0.3)]">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -440,6 +289,7 @@ function FilterBar({ selectedProgram, onProgramChange }: { selectedProgram: stri
           <button
             type="button"
             className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-display font-semibold text-night shadow-[0_8px_20px_rgba(169,223,216,0.3)] transition hover:brightness-110"
+            onClick={onCreate}
           >
             <PlusIcon className="h-4 w-4" />
             Create Project
@@ -447,6 +297,423 @@ function FilterBar({ selectedProgram, onProgramChange }: { selectedProgram: stri
         </div>
       </div>
     </div>
+  )
+}
+
+function CreateProjectFlow({ onExit }: { onExit: () => void }) {
+  const [selectedInitiative, setSelectedInitiative] = useState(initiativeOptions[0].value)
+  const [selectedTemplate, setSelectedTemplate] = useState(templateOptions[0].value)
+  const [activeStep, setActiveStep] = useState<StepId>('basic-info')
+  const [projectName, setProjectName] = useState('')
+  const [projectDescription, setProjectDescription] = useState('')
+  const [completedDocs, setCompletedDocs] = useState(() => new Set(initialCompletedDocIds))
+  const [members, setMembers] = useState<CreateTeamMember[]>(() => teamMembers.map((member) => ({ ...member })))
+
+  const selectedInitiativeOption = initiativeOptions.find((option) => option.value === selectedInitiative) ?? initiativeOptions[0]
+  const stepIndex = stepOrder.findIndex((step) => step.id === activeStep)
+  const isLastStep = stepIndex === stepOrder.length - 1
+  const nextStep = stepOrder[stepIndex + 1]?.id
+  const previousStep = stepOrder[stepIndex - 1]?.id
+
+  const assignedCount = members.filter((member) => member.selected).length
+  const teamCoverage = members.length ? Math.round((assignedCount / members.length) * 100) : 0
+  const completedDocCount = documentItems.filter((doc) => completedDocs.has(doc.id)).length
+  const documentProgress = documentItems.length ? Math.round((completedDocCount / documentItems.length) * 100) : 0
+  const requiredDocs = documentItems.filter((doc) => doc.required).length
+  const requiredDocsComplete = documentItems.filter((doc) => doc.required && completedDocs.has(doc.id)).length
+  const selectedMembers = members.filter((member) => member.selected)
+  const totalAllocatedHours = selectedMembers.reduce((sum, member) => sum + member.allocation, 0)
+  const totalAvailableHours = selectedMembers.reduce((sum, member) => sum + member.availability, 0)
+  const allocationPercent = totalAvailableHours ? Math.round((totalAllocatedHours / totalAvailableHours) * 100) : 0
+
+  const handlePrimaryAction = () => {
+    if (isLastStep) {
+      const payload = {
+        initiative: selectedInitiative,
+        template: selectedTemplate,
+        name: projectName,
+        description: projectDescription,
+        documents: Array.from(completedDocs),
+        team: members.filter((member) => member.selected),
+      }
+      console.info('Submitting project payload', payload)
+      onExit()
+      return
+    }
+
+    if (nextStep) {
+      setActiveStep(nextStep)
+    }
+  }
+
+  const handleSaveDraft = () => {
+    const draft = {
+      initiative: selectedInitiative,
+      template: selectedTemplate,
+      name: projectName,
+      description: projectDescription,
+      documents: Array.from(completedDocs),
+      team: members.filter((member) => member.selected),
+      step: activeStep,
+    }
+    console.info('Saving draft project', draft)
+    onExit()
+  }
+
+  const handleReset = () => {
+    setSelectedInitiative(initiativeOptions[0].value)
+    setSelectedTemplate(templateOptions[0].value)
+    setProjectName('')
+    setProjectDescription('')
+    setCompletedDocs(new Set(initialCompletedDocIds))
+    setMembers(teamMembers.map((member) => ({ ...member })))
+    setActiveStep('basic-info')
+  }
+
+  const handleDocumentToggle = (event: ReactMouseEvent<HTMLButtonElement>, id: string) => {
+    event.preventDefault()
+    event.stopPropagation()
+    toggleDocument(id)
+  }
+
+  const toggleDocument = (id: string) => {
+    const docMeta = documentItems.find((doc) => doc.id === id)
+    if (docMeta?.locked) {
+      return
+    }
+
+    setCompletedDocs((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  const toggleMember = (id: string) => {
+    setMembers((prev) => prev.map((member) => (member.id === id ? { ...member, selected: !member.selected } : member)))
+  }
+
+  const content = {
+    'basic-info': (
+      <div className="space-y-6">
+        <div>
+          <h2 className="font-display text-2xl font-medium text-soft-white">Submit new request</h2>
+          <p className="mt-2 text-sm text-soft-white/65">
+            Populate the starter details for the {selectedInitiativeOption.label.toLowerCase()} workstream before inviting the broader team.
+          </p>
+        </div>
+        <div className="space-y-5">
+          <label className="block">
+            <span className="font-display text-sm font-semibold text-soft-white">Project Name</span>
+            <input
+              value={projectName}
+              onChange={(event) => setProjectName(event.target.value)}
+              placeholder="Enter project name"
+              className="mt-2 w-full rounded-[7px] border border-[#323449] bg-[#1B1C24] px-4 py-3 text-sm text-soft-white placeholder:text-soft-white/35 focus:border-accent focus:outline-none"
+            />
+          </label>
+          <label className="block">
+            <span className="font-display text-sm font-semibold text-soft-white">Project Description</span>
+            <textarea
+              value={projectDescription}
+              onChange={(event) => setProjectDescription(event.target.value)}
+              placeholder="Outline scope, milestones, and desired outcomes"
+              rows={6}
+              className="mt-2 w-full rounded-[7px] border border-[#323449] bg-[#1B1C24] px-4 py-3 text-sm text-soft-white placeholder:text-soft-white/35 focus:border-accent focus:outline-none"
+            />
+          </label>
+        </div>
+      </div>
+    ),
+    documents: (
+      <div className="rounded-[22px] border border-[#2F3A43] bg-[#1C1D27] p-6 shadow-[0_0_12px_rgba(169,223,216,0.18)]">
+        <ul className="space-y-4">
+          {documentItems.map((item) => {
+            const checked = completedDocs.has(item.id)
+            const isLocked = Boolean(item.locked)
+            const labelClasses = isLocked
+              ? 'font-display text-[20px] font-extrabold text-[#87888c] line-through'
+              : 'font-display text-[20px] font-extrabold text-soft-white'
+            const cardClasses =
+              'grid grid-cols-[auto_1fr_auto] items-center gap-6 rounded-[14px] border border-[rgba(47,58,67,0.85)] bg-[#1B1C24] px-6 py-7 text-left shadow-[0_0_8px_rgba(0,0,0,0.22)] transition hover:border-[rgba(169,223,216,0.35)] hover:bg-[#1F2029] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40'
+
+            const cardContent = (
+              <>
+                <span className="flex h-[80px] w-[80px] items-center justify-center rounded-[20px] bg-[#1C1E27]">
+                  <Image
+                    src={documentIconSrc[item.icon]}
+                    alt=""
+                    width={48}
+                    height={48}
+                    className={`h-[48px] w-[48px] ${isLocked ? 'opacity-50' : ''}`}
+                  />
+                </span>
+                <span className={labelClasses}>{item.name}</span>
+                <button
+                  type="button"
+                  onClick={(event) => handleDocumentToggle(event, item.id)}
+                  disabled={isLocked}
+                  className={`grid h-6 w-6 place-items-center rounded-[4px] border transition ${
+                    checked ? 'border-soft-white bg-soft-white' : 'border-[#5B5F6D] bg-transparent'
+                  } disabled:opacity-50`}
+                >
+                  {checked ? <span className="block h-3 w-3 rounded-[2px] bg-night/80" /> : null}
+                </button>
+              </>
+            )
+
+            return (
+              <li key={item.id}>
+                {isLocked ? (
+                  <div className={`${cardClasses} opacity-80`}>{cardContent}</div>
+                ) : (
+                  <Link href={`/dashboard/projects/documents/${item.id}`} className={cardClasses}>
+                    {cardContent}
+                  </Link>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+        <div className="mt-6 rounded-[16px] border border-[#2F3A43] bg-[#13141b] px-5 py-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <div>
+              <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Document Status</p>
+              <p className="font-display text-lg font-semibold text-soft-white">{completedDocCount} / {documentItems.length} complete</p>
+              <p className="text-xs text-soft-white/60">{requiredDocsComplete} of {requiredDocs} required files ready</p>
+            </div>
+            <div className="ml-auto min-w-[220px]">
+              <div className="h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-gradient-to-r from-[#FFE48C] via-[#A9DFD8] to-[#63FFC9]" style={{ width: `${documentProgress}%` }} />
+              </div>
+              <p className="mt-1 text-right text-xs text-soft-white/60">{documentProgress}% prepared</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    ),
+    team: (
+      <div className="space-y-6">
+        <div>
+          <h2 className="font-display text-2xl font-medium text-soft-white">Assemble delivery team</h2>
+          <p className="mt-2 text-sm text-soft-white/65">Confirm core contributors and review their current capacity.</p>
+        </div>
+        <div className="space-y-3">
+          {members.map((member) => {
+            const utilization = Math.min(100, Math.round((member.allocation / member.availability) * 100))
+            return (
+              <div
+                key={member.id}
+                className="rounded-[12px] border border-[#323449] bg-[#1B1C24] px-4 py-3 shadow-[0_0_8px_rgba(0,0,0,0.28)]"
+              >
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={Boolean(member.selected)}
+                      onChange={() => toggleMember(member.id)}
+                      className="h-4 w-4 rounded-[5px] border border-[#49506A] bg-night accent-[#A9DFD8]"
+                    />
+                    <div>
+                      <p className="font-display text-sm font-semibold text-soft-white">{member.name}</p>
+                      <p className="text-xs text-soft-white/60">{member.role}</p>
+                    </div>
+                  </label>
+                  <div className="ml-auto flex items-center gap-2 text-xs text-soft-white/60">
+                    <span>{member.allocation}h / {member.availability}h</span>
+                    <span className="rounded-full border border-[#2F303A] px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-soft-white/60">
+                      {utilization}% utilized
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 h-2 rounded-full bg-[#2B2F3D]">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-[#70B7FF] to-[#63FFC9]"
+                    style={{ width: `${utilization}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+        <div>
+          <div className="h-2 rounded-full bg-[#2B2F3D]">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-[#FFE48C] via-[#A9DFD8] to-[#63FFC9]"
+              style={{ width: `${teamCoverage}%` }}
+            />
+          </div>
+          <p className="mt-1 text-xs text-soft-white/65">Team coverage {teamCoverage}% complete</p>
+        </div>
+        <div className="rounded-[14px] border border-[#323449] bg-[#13141b] px-4 py-3 text-sm text-soft-white/70">
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Hours Confirmed</p>
+          <p className="font-display text-lg font-semibold text-soft-white">{totalAllocatedHours}h / {totalAvailableHours || 0}h committed</p>
+          <p className="text-xs text-soft-white/60">{allocationPercent}% of available time allocated across {selectedMembers.length} contributors</p>
+        </div>
+      </div>
+    ),
+  } as Record<StepId, ReactNode>
+
+  const primaryLabel = isLastStep ? 'Create Project' : 'Next'
+
+  return (
+    <>
+      <TopBar title="Project Management" />
+      <section className="mt-8 space-y-6">
+        <div className="flex flex-wrap items-center gap-3">
+          <DropdownSelect
+            value={selectedInitiative}
+            onChange={setSelectedInitiative}
+            options={initiativeOptions}
+            className="min-w-[220px]"
+            ariaLabel="Select initiative"
+          />
+          <DropdownSelect
+            value={selectedTemplate}
+            onChange={setSelectedTemplate}
+            options={templateOptions}
+            className="min-w-[180px]"
+            ariaLabel="Select template"
+          />
+          <button
+            type="button"
+            onClick={handleReset}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2 text-sm font-display font-semibold text-night shadow-[0_8px_20px_rgba(169,223,216,0.3)] transition hover:brightness-110"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Create Project
+          </button>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap gap-3">
+            {stepOrder.map((step) => {
+              const isActive = step.id === activeStep
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => setActiveStep(step.id)}
+                  className={`rounded-[10px] border px-8 py-3 text-sm font-display font-semibold transition ${
+                    isActive
+                      ? 'border-transparent bg-accent text-night shadow-[0_0_12px_rgba(169,223,216,0.35)]'
+                      : 'border-[#323449] bg-surface text-soft-white/80 hover:text-soft-white'
+                  }`}
+                >
+                  {step.label}
+                </button>
+              )
+            })}
+          </div>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleSaveDraft}
+              className="rounded-[10px] bg-surface px-10 py-[11px] text-sm font-display font-semibold text-soft-white shadow-[0_0_10px_rgba(169,223,216,0.18)] transition hover:brightness-110"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+
+        <div className="rounded-[18px] border border-[#2F3A43] bg-[#1C1D27] p-6 shadow-[0_0_12px_rgba(169,223,216,0.18)]">
+          {content[activeStep]}
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            {previousStep && (
+              <button
+                type="button"
+                onClick={() => setActiveStep(previousStep)}
+                className="rounded-[10px] border border-[#323449] px-8 py-3 text-sm font-display font-semibold text-soft-white transition hover:border-accent hover:text-soft-white"
+              >
+                Back
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handlePrimaryAction}
+              className="w-full rounded-[10px] bg-accent px-10 py-3 text-sm font-display font-semibold text-night shadow-[0_8px_20px_rgba(169,223,216,0.3)] transition hover:brightness-110 sm:w-[292px]"
+            >
+              {primaryLabel}
+            </button>
+          </div>
+        </div>
+      </section>
+    </>
+  )
+}
+
+function DropdownSelect({
+  value,
+  onChange,
+  options,
+  className = '',
+  ariaLabel,
+}: {
+  value: string
+  onChange: (value: string) => void
+  options: CreateDropdownOption[]
+  className?: string
+  ariaLabel?: string
+}) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement | null>(null)
+  const selectedOption = options.find((option) => option.value === value) ?? options[0]
+
+  useEffect(() => {
+    const handler = (event: MouseEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  return (
+    <div ref={ref} className={`relative ${className}`}>
+      <button
+        type="button"
+        aria-label={ariaLabel}
+        onClick={() => setOpen((state) => !state)}
+        className="flex w-full items-center justify-between rounded-[10px] border border-[#323449] bg-surface px-4 py-2 text-sm font-display text-soft-white transition hover:border-accent"
+      >
+        {selectedOption.label}
+        <ChevronIcon className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div className="absolute z-30 mt-2 w-full rounded-[10px] border border-[#323449] bg-[#1B1C24] shadow-[0_12px_28px_rgba(0,0,0,0.45)]">
+          {options.map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              onClick={() => {
+                onChange(option.value)
+                setOpen(false)
+              }}
+              className={`flex w-full items-start gap-2 px-4 py-3 text-left text-sm text-soft-white transition hover:bg-white/5 ${
+                option.value === value ? 'bg-white/5' : ''
+              }`}
+            >
+              <span className="font-display font-semibold">{option.label}</span>
+              {option.description && <span className="text-xs text-soft-white/60">{option.description}</span>}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ChevronIcon({ className = '' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6">
+      <path d="m4 6 4 4 4-4" />
+    </svg>
   )
 }
 

@@ -45,7 +45,7 @@ export default function TaskMemberPage({ params }: TaskMemberPageProps) {
 			<div className="flex flex-col gap-8">
 				<TopBar title={detail.sectionTitle} />
 				<div className="space-y-6">
-					<div className="flex items-center gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.08)]">
+					<div className="flex items-center gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.045)]">
 						<div className="h-14 w-14 overflow-hidden rounded-full border border-[#2F303A]">
 							<Image src={avatarSrc} alt={`${detail.name} avatar`} width={56} height={56} className="h-full w-full" />
 						</div>
@@ -56,7 +56,7 @@ export default function TaskMemberPage({ params }: TaskMemberPageProps) {
 					</div>
 
 					<div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,0.65fr)]">
-						<div className="flex flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.07)] sm:flex-row sm:items-center sm:justify-between">
+						<div className="flex flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.04)] sm:flex-row sm:items-center sm:justify-between">
 							<div className="space-y-3">
 								<h2 className="font-display text-[28px] font-semibold text-soft-white">{detail.addTaskCard.title}</h2>
 								{detail.addTaskCard.description ? (
@@ -76,7 +76,7 @@ export default function TaskMemberPage({ params }: TaskMemberPageProps) {
 							</div>
 						</div>
 
-						<div className="flex h-full flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.07)]">
+						<div className="flex h-full flex-col gap-4 rounded-[20px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_4px_rgba(169,223,216,0.04)]">
 							<div className="flex items-center justify-between">
 								<p className="font-display text-[24px] font-semibold text-soft-white">{detail.priorityCard.label}</p>
 								{priorityOptions.length === 0 && (
@@ -118,7 +118,7 @@ export default function TaskMemberPage({ params }: TaskMemberPageProps) {
 						</div>
 					</div>
 
-					<section className="rounded-[26px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_8px_rgba(169,223,216,0.09)]">
+					<section className="rounded-[26px] border border-[#2F303A] bg-[#21222D] p-6 shadow-[0_0_6px_rgba(169,223,216,0.05)]">
 						<header className="space-y-3 border-b border-white/10 pb-5">
 							<div>
 								<h2 className="font-display text-[26px] font-semibold text-soft-white">{detail.board.title}</h2>

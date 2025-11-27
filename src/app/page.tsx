@@ -1,8 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+
+const DEMO_EMAIL = 'demo@tartibix.com'
+const DEMO_PASSWORD = 'Tartibix123!'
 
 function EyeIcon() {
   return (
@@ -31,7 +35,24 @@ function EyeOffIcon() {
 }
 
 export default function Home() {
+  const router = useRouter()
   const [showPassword, setShowPassword] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const isValid = email.trim().toLowerCase() === DEMO_EMAIL && password === DEMO_PASSWORD
+
+    if (isValid) {
+      setErrorMessage('')
+      router.push('/dashboard')
+      return
+    }
+
+    setErrorMessage('Invalid credentials. Use demo@tartibix.com / Tartibix123!')
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-night px-4 py-10">
@@ -49,13 +70,16 @@ export default function Home() {
           </div>
 
           <div className="flex flex-1 flex-col justify-center">
-            <form className="mx-auto flex w-full max-w-[528px] flex-col gap-8">
+            <form className="mx-auto flex w-full max-w-[528px] flex-col gap-6" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-6">
                 <label className="flex flex-col gap-2 text-base font-medium text-muted-text">
                   E-mail
                   <input
                     type="email"
                     placeholder="example@gmail.com"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    autoComplete="email"
                     className="h-[55px] rounded-xl border border-transparent bg-surface px-5 text-base text-soft-white shadow-inset focus:border-accent focus:ring-0"
                   />
                 </label>
@@ -66,6 +90,9 @@ export default function Home() {
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="@#*%"
+                      value={password}
+                      onChange={(event) => setPassword(event.target.value)}
+                      autoComplete="current-password"
                       className="h-[55px] flex-1 rounded-xl rounded-r-none border-0 bg-transparent px-5 text-base text-soft-white focus:ring-0"
                     />
                     <button
@@ -96,12 +123,23 @@ export default function Home() {
                 </Link>
               </div>
 
-              <button
-                type="submit"
-                className="mt-2 h-[60px] rounded-[20px] bg-accent-soft text-lg font-semibold text-soft-white transition hover:bg-accent/70"
-              >
-                Sign in
-              </button>
+              <div className="space-y-3">
+                {errorMessage ? (
+                  <p className="text-sm text-[#FF7A7A]" role="status" aria-live="polite">
+                    {errorMessage}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    Demo credentials — E-mail: demo@tartibix.com, Password: Tartibix123!
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="h-[60px] w-full rounded-[20px] bg-accent-soft text-lg font-semibold text-soft-white transition hover:bg-accent/70"
+                >
+                  Sign in
+                </button>
+              </div>
             </form>
           </div>
         </section>

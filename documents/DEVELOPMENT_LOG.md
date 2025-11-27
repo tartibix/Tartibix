@@ -81,6 +81,37 @@
    21.1 [Page Construction](#page-construction)
    21.2 [Static Dataset Architecture](#static-dataset-architecture)
    21.3 [Interactive Metrics & Controls](#interactive-metrics--controls)
+22. [Project Portfolio Card Removal](#project-portfolio-card-removal)
+   22.1 [Component Decommission](#component-decommission)
+   22.2 [Layout Integrity Check](#layout-integrity-check)
+   22.3 [Future Enhancements](#future-enhancements)
+23. [Project Creation Flow Revamp](#project-creation-flow-revamp)
+   23.1 [Figma-Accurate Wizard](#figma-accurate-wizard)
+   23.2 [Create Flow Data Hub](#create-flow-data-hub)
+   23.3 [Document & Team Metrics](#document--team-metrics)
+24. [Task Management Shadow Softening](#task-management-shadow-softening)
+   24.1 [Card & Section Shadows](#card--section-shadows)
+   24.2 [Progress Marker Glow](#progress-marker-glow)
+25. [Supporting Documents Upload Revamp](#supporting-documents-upload-revamp)
+   25.1 [State-Driven Document Controls](#state-driven-document-controls)
+   25.2 [Next.js Compatibility Fix](#nextjs-compatibility-fix)
+   25.3 [Save-and-Return Flow](#save-and-return-flow)
+26. [Resources Dashboard Implementation](#resources-dashboard-implementation)
+   26.1 [Figma Layout Recreation](#figma-layout-recreation)
+   26.2 [Static Data & Components](#static-data--components)
+   26.3 [Asset Pipeline](#asset-pipeline)
+   26.4 [Validation & Known Issues](#validation--known-issues)
+27. [Resource Card Polish & Icon Cleanup](#resource-card-polish--icon-cleanup)
+   27.1 [Shadow & Border Softening](#shadow--border-softening)
+   27.2 [Icon Wrapper Removal](#icon-wrapper-removal)
+28. [Admin Panel Implementation](#admin-panel-implementation)
+   28.1 [Initial Layout Build](#initial-layout-build)
+   28.2 [Shadow & Background Refinement](#shadow--background-refinement)
+   28.3 [Roles Tab Feature Parity](#roles-tab-feature-parity)
+   28.4 [Visual Alignment Pass](#visual-alignment-pass)
+29. [Login Gate & Metadata Enhancements](#login-gate--metadata-enhancements)
+   29.1 [Demo Credentials & Redirect](#demo-credentials--redirect)
+   29.2 [Social Metadata Refresh](#social-metadata-refresh)
 
 ---
 
@@ -1189,5 +1220,246 @@ This project successfully transformed from initial implementation to a productio
 
 ---
 
+## 22. Project Portfolio Card Removal
+
+### 22.1 Component Decommission
+
+**Objective:** Align `/dashboard/projects` with the latest stakeholder screenshot by retiring three nonessential cards.
+
+**Changes Made:**
+- Removed the `ProgramPerformanceSlider`, `RiskChecklist`, and `StatusBreakdownChart` JSX blocks plus their supporting state and props from `src/app/dashboard/projects/page.tsx`.
+- Deleted the component definitions to prevent unused-type lint errors, keeping the file focused on currently rendered sections only.
+- Confirmed the page no longer imports unused slices from `projectManagementData`, reducing cognitive load for future contributors.
+
+### 22.2 Layout Integrity Check
+
+**Objective:** Ensure the page maintains spacing rhythm and visual balance after subtracting the cards.
+
+**Actions:**
+- Verified the summary deck, filter bar, governance table, and project cards cascade without additional gaps or dangling borders.
+- Re-ran local TypeScript checks to guarantee the removal of components and types left no dangling references.
+- Manually inspected responsive breakpoints to confirm the absence of collapsed grid rows where the retired cards previously lived.
+
+### 22.3 Future Enhancements
+
+**Notes:**
+- Placeholder hooks remain available should updated visualizations be reintroduced once refreshed datasets ship from the product team.
+- Any future analytics sections should import directly from `projectManagementData` to keep all program KPIs centralized.
+
+---
+
+## 23. Project Creation Flow Revamp
+
+### 23.1 Figma-Accurate Wizard
+
+**Objective:** Replace the temporary create-project experience with the full multi-step wizard featured in the latest Project Management Figma file.
+
+**Changes Made:**
+- Rebuilt the `/dashboard/projects` create mode inside `src/app/dashboard/projects/page.tsx`, introducing Basic Info, Documents, and Team steps with stateful navigation controls.
+- Added bespoke dropdowns for Initiative and Template selection plus reusable step tabs so the UI mirrors the design reference and stays consistent with the dashboard chrome.
+- Ensured document cards, checklists, and team selectors stay responsive across breakpoints while preserving the new Top Bar and summary shell.
+
+### 23.2 Create Flow Data Hub
+
+**Objective:** Centralize every option, checklist item, and roster entry powering the wizard so future API wiring swaps a single shared source.
+
+**Changes Made:**
+- Created `src/lib/projectCreateFlowData.ts` exporting typed collections for initiatives, templates, document requirements, and team members, including helper types (`CreateDropdownOption`, `CreateDocumentItem`, `CreateTeamMember`).
+- Updated `projects/page.tsx` to import the dataset instead of defining local constants, guaranteeing dropdowns, checkboxes, and checklists render from synchronized static data.
+- Seeded realistic copy (e.g., “Website Redesign”, “Contractual & Legal”) and lock states so the UI demonstrates final behavior even before backend integration.
+
+### 23.3 Document & Team Metrics
+
+**Objective:** Keep all gauges, bars, and helper text synchronized with the wizard’s actual state rather than hard-coded numbers.
+
+**Changes Made:**
+- Added derived metrics for completed vs. total documents, required-file coverage, team coverage percentage, and total committed hours, each recomputed from the importable dataset and current selections.
+- Rendered new contextual cards showing document status bars and team allocation summaries so users immediately see progress feedback as they toggle checkboxes or assign contributors.
+- Guarded every percentage calculation against divide-by-zero scenarios to keep the UI stable as datasets evolve.
+
+---
+
+## 24. Task Management Shadow Softening
+
+### 24.1 Card & Section Shadows
+
+**Objective:** Reduce the teal glow around Task Management cards, buttons, and fields to satisfy the latest art-direction request for flatter borders.
+
+**Changes Made:**
+- Updated every major card and aside within `src/app/dashboard/tasks/page.tsx` to use lighter Tailwind arbitrary shadows (`shadow-[0_0_2px_rgba(169,223,216,0.03/0.035)]`) while preserving borders, padding, and content structure.
+- Ensured the adjustments cover the overview, tasks, timeline, and both team sections so the entire module shares the same softened aesthetic.
+
+### 24.2 Progress Marker Glow
+
+**Objective:** Tone down accent glows on inline controls so they match the reduced card intensity.
+
+**Changes Made:**
+- Decreased the inline `boxShadow` strength for the overview progress indicator and timeline milestone markers from `0 0 3px` to `0 0 2px`, keeping the colors data-driven but far less pronounced.
+- Verified that slider markers, checkboxes, and table borders retained accessibility contrast after the adjustments.
+
+---
+
+## 25. Supporting Documents Upload Revamp
+
+### 25.1 State-Driven Document Controls
+
+**Objective:** Bring the `/dashboard/projects/documents/[documentId]` view up to Figma parity with fully data-driven dropdowns, upload toggles, and progress summaries.
+
+**Changes Made:**
+- Converted the page to a dedicated client component with `useState` and `useMemo`, wiring initiative/template dropdowns and upload rows to `projectCreateFlowData` so every control reflects static data that can later be swapped for Supabase values.
+- Rebuilt the uploads table markup to mirror the supplied layout, including row numbering, document metadata columns, and per-row Upload/Uploaded pills that toggle state for each requirement.
+- Added derived completion counts and a gradient progress bar that automatically reflects how many document rows have been marked uploaded, keeping the UI feedback loop data-driven.
+
+**Files Modified:** `src/app/dashboard/projects/documents/[documentId]/page.tsx`, `src/lib/projectCreateFlowData.ts`
+
+### 25.2 Next.js Compatibility Fix
+
+**Objective:** Resolve a blocking dev-server error complaining about `use client` being combined with `generateStaticParams()` on the dynamic document upload route.
+
+**Changes Made:**
+- Removed the `generateStaticParams` export (the page already reads from local static data) to satisfy Next.js 14’s rule that client components cannot declare static params.
+- Verified `npm run dev` no longer throws `Error: Page ... cannot use both "use client" and export function "generateStaticParams()"` when navigating to any document upload route.
+
+**Files Modified:** `src/app/dashboard/projects/documents/[documentId]/page.tsx`
+
+### 25.3 Save-and-Return Flow
+
+**Objective:** Implement the requested “save and back” interaction so pressing Save returns users to the previous view while backend persistence is pending.
+
+**Changes Made:**
+- Imported `useRouter` from `next/navigation` and introduced a shared `handleSave` helper that calls `router.back()` as a temporary stand-in for future API calls.
+- Hooked both Save buttons (the tab-level action and the footer CTA) into the handler, ensuring consistent navigation regardless of which Save control is used.
+- Added a short inline comment noting the placeholder behavior so future contributors know where to attach real mutation logic.
+
+**Files Modified:** `src/app/dashboard/projects/documents/[documentId]/page.tsx`
+
+---
+
+## 26. Resources Dashboard Implementation
+
+### 26.1 Figma Layout Recreation
+
+**Objective:** Replace the placeholder `/dashboard/recources` route with the pixel-accurate Resources view showcased in the latest Figma file.
+
+**Changes Made:**
+- Rebuilt `src/app/dashboard/recources/page.tsx` inside `DashboardShell` and the shared `TopBar`, matching the 1103px artboard spacing, typography, and section hierarchy.
+- Introduced hero summary stats, a resource health table, and CTA buttons in the same order as the reference to preserve stakeholder-approved storytelling.
+- Added responsive grid rules (`xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]`) so the cards snap into their two-column layout on desktop while stacking cleanly on smaller breakpoints.
+
+### 26.2 Static Data & Components
+
+**Objective:** Keep the UI fully data-driven so future Supabase integrations only swap a single source of truth.
+
+**Changes Made:**
+- Declared a `RESOURCES` collection containing name, description, allocation metrics, and icon metadata, ensuring every card renders from structured data rather than inline copy.
+- Built an inline `ResourceCard` helper that handles layout, KPIs, CTA buttons, and hover states so new resources can be added by extending the dataset.
+- Added defensive formatting helpers (e.g., `Intl.NumberFormat`) for percentage labels, ensuring the UI stays consistent even if values change.
+
+### 26.3 Asset Pipeline
+
+**Objective:** Source the official iconography so the coded view mirrors the Figma deliverable exactly.
+
+**Changes Made:**
+- Exported the Materials, Equipment, and Employees glyphs from Figma via MCP and saved them under `public/images/resources/material-inventory.svg`, `equipment-availability.svg`, and `employee-allocation.svg`.
+- Swapped the placeholder emoji for proper `<Image>` components that reference the new SVGs, preserving crisp edges on high-DPI screens.
+- Verified each asset path is preloaded by Next.js to keep Lighthouse image warnings at zero.
+
+### 26.4 Validation & Known Issues
+
+**Objective:** Document the verification steps plus any outstanding warnings.
+
+**Changes Made:**
+- Ran `npm run lint` after the rebuild; the command still fails because of pre-existing hook-order issues in `src/app/dashboard/projects/documents/[documentId]/page.tsx`, but no new errors originate from the Resources work.
+- Noted the blocker inside the dev log so future contributors understand lint failures are unrelated to the latest Resources implementation.
+
+---
+
+## 27. Resource Card Polish & Icon Cleanup
+
+### 27.1 Shadow & Border Softening
+
+**Objective:** Reduce the teal glow and hard outlines on the new resource cards plus related Task Management surfaces to satisfy the latest art-direction feedback.
+
+**Changes Made:**
+- Dialed down every custom shadow inside `src/app/dashboard/recources/page.tsx`, switching to lower-opacity arbitrary Tailwind values (`shadow-[0_0_6px_rgba(169,223,216,0.18)]`) so borders lead the eye while the teal glow stays subtle.
+- Matched the softer treatment inside `src/app/dashboard/tasks/page.tsx`, `src/app/dashboard/tasks/[slug]/page.tsx`, and `src/components/dashboard/TaskCreateForm.tsx` to keep the broader dashboard visuals consistent.
+- Adjusted border colors on resource cards from bright cyan to muted slate tones (`#2B3143`) so the cards blend smoothly with the dark background.
+
+### 27.2 Icon Wrapper Removal
+
+**Objective:** Remove the square glow boxes behind the resource icons, mirroring the updated Figma screenshot.
+
+**Changes Made:**
+- Simplified the `ResourceCard` icon container to a plain `div` with centered grid alignment, dropping the rounded-square background, border, and drop shadow.
+- Updated spacing and flex alignment so the bare SVG icons remain vertically centered without the visual crutch of the previous container.
+- Double-checked the refreshed layout against the stakeholder screenshot to confirm 1:1 parity once the wrapper boxes were gone.
+
+---
+
+## 28. Admin Panel Implementation
+
+### 28.1 Initial Layout Build
+
+**Objective:** Replace the `/dashboard/admin-panel` placeholder with a faithful recreation of the supplied Admin Panel Figma artboard.
+
+**Changes Made:**
+- Swapped the `PagePlaceholder` usage for a bespoke layout in `src/app/dashboard/admin-panel/page.tsx`, reusing `DashboardShell` so the page inherits the shared Sidebar.
+- Structured the hero card, tab controls, search field, column header row, and data table using the same teal-glow styling as the rest of the dashboard.
+- Seeded the table with six representative user rows (`Admin`, `Editor`, `Viewer`) to showcase column formatting until backend wiring arrives.
+
+### 28.2 Shadow & Background Refinement
+
+**Objective:** Tone down the teal glow and eliminate the double-card effect visible in early screenshots.
+
+**Changes Made:**
+- Reduced all custom shadows (tabs, cards, buttons, search input, table rows) to lighter opacity values so borders lead visually.
+- Removed the redundant outer wrapper card after stakeholder feedback, leaving a single rounded container that mirrors the Figma composition.
+
+### 28.3 Roles Tab Feature Parity
+
+**Objective:** Activate the Roles tab so it matches the Users experience instead of showing empty placeholder cards.
+
+**Changes Made:**
+- Converted the page to a client component with `useState`, enabling real tab switching between Users and Roles.
+- Added static `roles` and `permissionGroups` datasets plus a `RoleRow` component so Role entries share the same column layout, hover treatment, and action icon as User rows.
+- Introduced a data-driven permission matrix rendered with semantic `<table>` markup and On/Off indicators so stakeholders can demo role access controls.
+
+### 28.4 Visual Alignment Pass
+
+**Objective:** Ensure the Roles tab mirrors the Users tab spacing, borders, and typography exactly.
+
+**Changes Made:**
+- Reused the shared search input component with role-specific placeholder copy, ensuring both tabs use identical field styling.
+- Updated permission chips, member badges, and the matrix table headers to apply the same `#1B1C24` / `#2F303A` palette plus rounded corners used throughout the Admin Panel.
+- Verified action buttons, hover states, and shadow intensity align across both tabs, delivering a consistent visual theme.
+
+**Files Modified:** `src/app/dashboard/admin-panel/page.tsx`
+
+---
+
+## 29. Login Gate & Metadata Enhancements
+
+### 29.1 Demo Credentials & Redirect
+
+**Objective:** Provide reviewers with temporary credentials so they can access `/dashboard` without a backend auth service.
+
+**Changes Made:**
+- Added inline constants for `demo@tartibix.com` and `Tartibix123!`, input state handlers, error messaging, and a guarded submit handler that redirects to `/dashboard` when the credentials match.
+- Surface the credential hint beneath the Sign in button and display a red error when inputs are incorrect, improving onboarding clarity.
+
+**Files Modified:** `src/app/page.tsx`
+
+### 29.2 Social Metadata Refresh
+
+**Objective:** Fix the poor link preview shown when sharing the deployment URL.
+
+**Changes Made:**
+- Replaced the default Next.js metadata with branded values (title template, description, Open Graph, and Twitter cards) pointing to the login illustration so Slack/Teams/Twitter generate accurate thumbnails.
+- Declared `metadataBase`, canonical URLs, and icon paths to future-proof SEO once the site is public.
+
+**Files Modified:** `src/app/layout.tsx`
+
+---
+
 *Document created on November 5, 2025*  
-*Last updated: November 22, 2025*
+*Last updated: November 27, 2025*
