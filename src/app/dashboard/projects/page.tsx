@@ -11,6 +11,7 @@ import {
   type CreateDropdownOption,
   type CreateTeamMember,
   type DocumentIconVariant,
+  type TeamHierarchyMember,
 } from '@/lib/projectCreateFlowData'
 import { projectManagementData, type GovernanceReviewRow, type Milestone, type Project } from '@/lib/projectManagementData'
 
@@ -18,7 +19,7 @@ const { programOptions, projects, governanceReviews, focusOptions, quarterOption
 
 type PageMode = 'overview' | 'create'
 
-const { initiativeOptions, templateOptions, documentItems, teamMembers } = projectCreateFlowData
+const { initiativeOptions, templateOptions, documentItems, teamMembers, teamHierarchy } = projectCreateFlowData
 
 const initialCompletedDocIds = documentItems.filter((item) => item.completed).map((item) => item.id)
 
@@ -35,6 +36,8 @@ const stepOrder = [
 ] as const
 
 type StepId = typeof stepOrder[number]['id']
+
+type DocumentsSubView = 'categories' | 'table'
 
 const statusTokens: Record<string, { textClass: string; chipClass: string }> = {
   Execution: { textClass: 'text-[#8CDCC7]', chipClass: 'bg-[#1f3b30]/70 border border-[#315b48]' },
@@ -304,6 +307,7 @@ function CreateProjectFlow({ onExit }: { onExit: () => void }) {
   const [selectedInitiative, setSelectedInitiative] = useState(initiativeOptions[0].value)
   const [selectedTemplate, setSelectedTemplate] = useState(templateOptions[0].value)
   const [activeStep, setActiveStep] = useState<StepId>('basic-info')
+  const [documentsSubView, setDocumentsSubView] = useState<DocumentsSubView>('categories')
   const [projectName, setProjectName] = useState('')
   const [projectDescription, setProjectDescription] = useState('')
   const [completedDocs, setCompletedDocs] = useState(() => new Set(initialCompletedDocIds))
@@ -429,132 +433,25 @@ function CreateProjectFlow({ onExit }: { onExit: () => void }) {
         </div>
       </div>
     ),
-    documents: (
-      <div className="rounded-[22px] border border-[#2F3A43] bg-[#1C1D27] p-6 shadow-[0_0_12px_rgba(169,223,216,0.18)]">
-        <ul className="space-y-4">
-          {documentItems.map((item) => {
-            const checked = completedDocs.has(item.id)
-            const isLocked = Boolean(item.locked)
-            const labelClasses = isLocked
-              ? 'font-display text-[20px] font-extrabold text-[#87888c] line-through'
-              : 'font-display text-[20px] font-extrabold text-soft-white'
-            const cardClasses =
-              'grid grid-cols-[auto_1fr_auto] items-center gap-6 rounded-[14px] border border-[rgba(47,58,67,0.85)] bg-[#1B1C24] px-6 py-7 text-left shadow-[0_0_8px_rgba(0,0,0,0.22)] transition hover:border-[rgba(169,223,216,0.35)] hover:bg-[#1F2029] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40'
-
-            const cardContent = (
-              <>
-                <span className="flex h-[80px] w-[80px] items-center justify-center rounded-[20px] bg-[#1C1E27]">
-                  <Image
-                    src={documentIconSrc[item.icon]}
-                    alt=""
-                    width={48}
-                    height={48}
-                    className={`h-[48px] w-[48px] ${isLocked ? 'opacity-50' : ''}`}
-                  />
-                </span>
-                <span className={labelClasses}>{item.name}</span>
-                <button
-                  type="button"
-                  onClick={(event) => handleDocumentToggle(event, item.id)}
-                  disabled={isLocked}
-                  className={`grid h-6 w-6 place-items-center rounded-[4px] border transition ${
-                    checked ? 'border-soft-white bg-soft-white' : 'border-[#5B5F6D] bg-transparent'
-                  } disabled:opacity-50`}
-                >
-                  {checked ? <span className="block h-3 w-3 rounded-[2px] bg-night/80" /> : null}
-                </button>
-              </>
-            )
-
-            return (
-              <li key={item.id}>
-                {isLocked ? (
-                  <div className={`${cardClasses} opacity-80`}>{cardContent}</div>
-                ) : (
-                  <Link href={`/dashboard/projects/documents/${item.id}`} className={cardClasses}>
-                    {cardContent}
-                  </Link>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-        <div className="mt-6 rounded-[16px] border border-[#2F3A43] bg-[#13141b] px-5 py-4">
-          <div className="flex flex-wrap items-center gap-4">
-            <div>
-              <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Document Status</p>
-              <p className="font-display text-lg font-semibold text-soft-white">{completedDocCount} / {documentItems.length} complete</p>
-              <p className="text-xs text-soft-white/60">{requiredDocsComplete} of {requiredDocs} required files ready</p>
-            </div>
-            <div className="ml-auto min-w-[220px]">
-              <div className="h-2 rounded-full bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-[#FFE48C] via-[#A9DFD8] to-[#63FFC9]" style={{ width: `${documentProgress}%` }} />
-              </div>
-              <p className="mt-1 text-right text-xs text-soft-white/60">{documentProgress}% prepared</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    documents: documentsSubView === 'categories' ? (
+      <DocumentsCategoriesView
+        documentItems={documentItems}
+        completedDocs={completedDocs}
+        onToggleDocument={toggleDocument}
+        onSelectCategory={(id) => {
+          // Navigate to table view for selected category
+          setDocumentsSubView('table')
+        }}
+      />
+    ) : (
+      <DocumentsTableView
+        documentItems={documentItems}
+        completedDocs={completedDocs}
+        onBack={() => setDocumentsSubView('categories')}
+      />
     ),
     team: (
-      <div className="space-y-6">
-        <div>
-          <h2 className="font-display text-2xl font-medium text-soft-white">Assemble delivery team</h2>
-          <p className="mt-2 text-sm text-soft-white/65">Confirm core contributors and review their current capacity.</p>
-        </div>
-        <div className="space-y-3">
-          {members.map((member) => {
-            const utilization = Math.min(100, Math.round((member.allocation / member.availability) * 100))
-            return (
-              <div
-                key={member.id}
-                className="rounded-[12px] border border-[#323449] bg-[#1B1C24] px-4 py-3 shadow-[0_0_8px_rgba(0,0,0,0.28)]"
-              >
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={Boolean(member.selected)}
-                      onChange={() => toggleMember(member.id)}
-                      className="h-4 w-4 rounded-[5px] border border-[#49506A] bg-night accent-[#A9DFD8]"
-                    />
-                    <div>
-                      <p className="font-display text-sm font-semibold text-soft-white">{member.name}</p>
-                      <p className="text-xs text-soft-white/60">{member.role}</p>
-                    </div>
-                  </label>
-                  <div className="ml-auto flex items-center gap-2 text-xs text-soft-white/60">
-                    <span>{member.allocation}h / {member.availability}h</span>
-                    <span className="rounded-full border border-[#2F303A] px-2 py-0.5 text-[10px] uppercase tracking-[0.18em] text-soft-white/60">
-                      {utilization}% utilized
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-3 h-2 rounded-full bg-[#2B2F3D]">
-                  <div
-                    className="h-full rounded-full bg-gradient-to-r from-[#70B7FF] to-[#63FFC9]"
-                    style={{ width: `${utilization}%` }}
-                  />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-        <div>
-          <div className="h-2 rounded-full bg-[#2B2F3D]">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-[#FFE48C] via-[#A9DFD8] to-[#63FFC9]"
-              style={{ width: `${teamCoverage}%` }}
-            />
-          </div>
-          <p className="mt-1 text-xs text-soft-white/65">Team coverage {teamCoverage}% complete</p>
-        </div>
-        <div className="rounded-[14px] border border-[#323449] bg-[#13141b] px-4 py-3 text-sm text-soft-white/70">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Hours Confirmed</p>
-          <p className="font-display text-lg font-semibold text-soft-white">{totalAllocatedHours}h / {totalAvailableHours || 0}h committed</p>
-          <p className="text-xs text-soft-white/60">{allocationPercent}% of available time allocated across {selectedMembers.length} contributors</p>
-        </div>
-      </div>
+      <TeamHierarchyView teamHierarchy={teamHierarchy} />
     ),
   } as Record<StepId, ReactNode>
 
@@ -643,6 +540,357 @@ function CreateProjectFlow({ onExit }: { onExit: () => void }) {
         </div>
       </section>
     </>
+  )
+}
+
+/* ===== Documents Categories View ===== */
+function DocumentsCategoriesView({
+  documentItems,
+  completedDocs,
+  onToggleDocument,
+  onSelectCategory,
+}: {
+  documentItems: typeof projectCreateFlowData.documentItems
+  completedDocs: Set<string>
+  onToggleDocument: (id: string) => void
+  onSelectCategory: (id: string) => void
+}) {
+  // The documentItems are already categories with uploads
+  const categoryColors: Record<string, string> = {
+    'contractual-legal': '#A9DFD8',
+    'project-setup-files': '#FFE48C',
+    'supporting-documents': '#C5D3FF',
+  }
+
+  const totalDocs = documentItems.reduce((sum, cat) => sum + (cat.uploads?.length || 0), 0)
+  const completedCount = completedDocs.size
+  const progress = totalDocs ? Math.round((completedCount / totalDocs) * 100) : 0
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-medium text-soft-white">Documents</h2>
+        <p className="mt-2 text-sm text-soft-white/65">
+          Select document categories to upload required files for project setup.
+        </p>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-3">
+        {documentItems.map((category) => {
+          const uploadsCount = category.uploads?.length || 0
+          const isComplete = completedDocs.has(category.id)
+          const color = categoryColors[category.id] || '#A9DFD8'
+
+          return (
+            <button
+              key={category.id}
+              type="button"
+              onClick={() => onSelectCategory(category.id)}
+              className="group relative flex flex-col items-center rounded-[20px] border border-[#323449] bg-[#1B1C24] p-6 text-center transition hover:border-accent/50 hover:bg-[#1F2029] focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+            >
+              {/* Checkbox indicator */}
+              <div className="absolute right-4 top-4">
+                <div
+                  className={`grid h-6 w-6 place-items-center rounded-[6px] border transition ${
+                    isComplete ? 'border-accent bg-accent' : 'border-[#5B5F6D] bg-transparent'
+                  }`}
+                >
+                  {isComplete && (
+                    <svg className="h-4 w-4 text-night" fill="none" viewBox="0 0 16 16" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M3 8l4 4 6-7" />
+                    </svg>
+                  )}
+                </div>
+              </div>
+
+              {/* Icon */}
+              <div
+                className="flex h-[80px] w-[80px] items-center justify-center rounded-[20px]"
+                style={{ backgroundColor: `${color}15` }}
+              >
+                <Image
+                  src={documentIconSrc[category.icon]}
+                  alt=""
+                  width={48}
+                  height={48}
+                  className="h-[48px] w-[48px]"
+                />
+              </div>
+
+              {/* Label */}
+              <p className="mt-4 font-display text-lg font-semibold text-soft-white">{category.name}</p>
+              <p className="mt-1 text-xs text-soft-white/50">
+                {uploadsCount} files
+              </p>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Progress bar */}
+      <div className="rounded-[16px] border border-[#2F3A43] bg-[#13141b] px-5 py-4">
+        <div className="flex flex-wrap items-center gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Document Status</p>
+            <p className="font-display text-lg font-semibold text-soft-white">{completedCount} / {documentItems.length} categories complete</p>
+          </div>
+          <div className="ml-auto min-w-[220px]">
+            <div className="h-2 rounded-full bg-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-[#FFE48C] via-[#A9DFD8] to-[#63FFC9]"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="mt-1 text-right text-xs text-soft-white/60">{progress}% prepared</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ===== Documents Table View ===== */
+function DocumentsTableView({
+  documentItems,
+  completedDocs,
+  onBack,
+}: {
+  documentItems: typeof projectCreateFlowData.documentItems
+  completedDocs: Set<string>
+  onBack: () => void
+}) {
+  const tableDocuments = [
+    { id: 'doc-1', name: 'Contract Agreement', type: 'PDF', size: '2.4 MB', status: 'Uploaded', date: '2024-01-15' },
+    { id: 'doc-2', name: 'NDA Document', type: 'PDF', size: '1.2 MB', status: 'Uploaded', date: '2024-01-14' },
+    { id: 'doc-3', name: 'Terms of Service', type: 'DOCX', size: '890 KB', status: 'Pending', date: '–' },
+    { id: 'doc-4', name: 'Privacy Policy', type: 'PDF', size: '1.8 MB', status: 'Uploaded', date: '2024-01-12' },
+    { id: 'doc-5', name: 'Service Agreement', type: 'PDF', size: '–', status: 'Required', date: '–' },
+  ]
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <button
+          type="button"
+          onClick={onBack}
+          className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-[#323449] bg-surface transition hover:border-accent"
+        >
+          <svg className="h-5 w-5 text-soft-white" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="2">
+            <path d="M12 4l-6 6 6 6" />
+          </svg>
+        </button>
+        <div>
+          <h2 className="font-display text-2xl font-medium text-soft-white">Contractual & Legal</h2>
+          <p className="mt-1 text-sm text-soft-white/65">
+            Upload required legal documents for project setup.
+          </p>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto rounded-[16px] border border-[#323449] bg-[#1B1C24]">
+        <table className="min-w-full">
+          <thead>
+            <tr className="border-b border-[#323449] text-left text-[11px] uppercase tracking-[0.2em] text-soft-white/55">
+              <th className="px-5 py-4 font-medium">Document Name</th>
+              <th className="px-5 py-4 font-medium">Type</th>
+              <th className="px-5 py-4 font-medium">Size</th>
+              <th className="px-5 py-4 font-medium">Status</th>
+              <th className="px-5 py-4 font-medium">Upload Date</th>
+              <th className="px-5 py-4 font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tableDocuments.map((doc) => {
+              const isUploaded = doc.status === 'Uploaded'
+              const isPending = doc.status === 'Pending'
+              const statusColors = isUploaded
+                ? 'text-[#63FFC9] bg-[#15352C]/80 border-[#315b48]'
+                : isPending
+                ? 'text-[#FFE48C] bg-[#3c3514]/70 border-[#6b591f]'
+                : 'text-[#FF9BB0] bg-[#3a1c1c]/70 border-[#7b3b3b]'
+
+              return (
+                <tr key={doc.id} className="border-b border-[#323449]/50 last:border-b-0">
+                  <td className="px-5 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-[8px] bg-[#21222D]">
+                        <svg className="h-5 w-5 text-soft-white/60" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M4 4h8l4 4v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                          <path d="M12 4v4h4" />
+                        </svg>
+                      </div>
+                      <span className="font-display text-sm font-medium text-soft-white">{doc.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-5 py-4 text-sm text-soft-white/70">{doc.type}</td>
+                  <td className="px-5 py-4 text-sm text-soft-white/70">{doc.size}</td>
+                  <td className="px-5 py-4">
+                    <span className={`inline-block rounded-full border px-3 py-1 text-xs font-semibold ${statusColors}`}>
+                      {doc.status}
+                    </span>
+                  </td>
+                  <td className="px-5 py-4 text-sm text-soft-white/70">{doc.date}</td>
+                  <td className="px-5 py-4">
+                    <button
+                      type="button"
+                      className={`rounded-[8px] px-4 py-2 text-xs font-display font-semibold transition ${
+                        isUploaded
+                          ? 'border border-[#323449] bg-transparent text-soft-white/70 hover:border-accent'
+                          : 'bg-accent text-night hover:brightness-110'
+                      }`}
+                    >
+                      {isUploaded ? 'View' : 'Upload'}
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Upload area */}
+      <div className="rounded-[16px] border-2 border-dashed border-[#323449] bg-[#1B1C24]/50 p-8 text-center transition hover:border-accent/50">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#21222D]">
+          <svg className="h-8 w-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+            <path d="M12 16V4m0 0l-4 4m4-4l4 4" />
+            <path d="M20 16v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4" />
+          </svg>
+        </div>
+        <p className="mt-4 font-display text-sm font-semibold text-soft-white">
+          Drag & drop files here or <span className="text-accent">browse</span>
+        </p>
+        <p className="mt-1 text-xs text-soft-white/50">
+          Supported formats: PDF, DOC, DOCX, XLS, XLSX (max 25MB)
+        </p>
+      </div>
+    </div>
+  )
+}
+
+/* ===== Team Hierarchy View ===== */
+function TeamHierarchyView({ teamHierarchy }: { teamHierarchy: TeamHierarchyMember[] }) {
+  const renderMember = (member: TeamHierarchyMember, isRoot = false) => {
+    const hasChildren = member.children && member.children.length > 0
+
+    return (
+      <div key={member.id} className={`flex flex-col items-center ${isRoot ? '' : 'mt-6'}`}>
+        {/* Member card */}
+        <div
+          className={`relative rounded-[14px] border bg-[#1B1C24] px-5 py-4 text-center shadow-[0_4px_12px_rgba(0,0,0,0.3)] transition hover:border-accent/50 ${
+            isRoot ? 'border-accent/40 bg-gradient-to-b from-[#1B1C24] to-[#1a2428]' : 'border-[#323449]'
+          }`}
+          style={{ minWidth: '160px' }}
+        >
+          {/* Avatar */}
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-sm font-display font-semibold text-soft-white">
+            {member.name.split(' ').map(n => n[0]).join('')}
+          </div>
+          <p className="mt-2 font-display text-sm font-semibold text-soft-white">{member.name}</p>
+          <p className="text-xs text-soft-white/60">{member.role}</p>
+          <p className="mt-1 text-[10px] text-soft-white/40">ID: {member.employeeId}</p>
+        </div>
+
+        {/* Connector lines and children */}
+        {hasChildren && (
+          <>
+            {/* Vertical line down */}
+            <div className="h-6 w-px bg-[#323449]" />
+
+            {/* Horizontal connector if multiple children */}
+            {member.children!.length > 1 && (
+              <div
+                className="h-px bg-[#323449]"
+                style={{
+                  width: `${Math.min(member.children!.length * 180, 600)}px`,
+                }}
+              />
+            )}
+
+            {/* Children container */}
+            <div className="flex flex-wrap justify-center gap-4">
+              {member.children!.map((child) => renderMember(child, false))}
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-medium text-soft-white">Team Structure</h2>
+        <p className="mt-2 text-sm text-soft-white/65">
+          Review the organizational hierarchy for this project.
+        </p>
+      </div>
+
+      {/* Search and filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 min-w-[240px]">
+          <svg
+            className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-soft-white/40"
+            fill="none"
+            viewBox="0 0 20 20"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <circle cx="9" cy="9" r="6" />
+            <path d="M14 14l4 4" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search team members..."
+            className="w-full rounded-[10px] border border-[#323449] bg-[#1B1C24] py-2.5 pl-10 pr-4 text-sm text-soft-white placeholder:text-soft-white/35 focus:border-accent focus:outline-none"
+          />
+        </div>
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-[10px] border border-[#323449] bg-surface px-4 py-2.5 text-sm font-display font-semibold text-soft-white/80 transition hover:border-accent"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+            <path d="M3 4h14M3 8h10M3 12h6" />
+          </svg>
+          Filter
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-2 rounded-[10px] border border-[#323449] bg-surface px-4 py-2.5 text-sm font-display font-semibold text-soft-white/80 transition hover:border-accent"
+        >
+          <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+            <rect x="3" y="3" width="6" height="6" rx="1" />
+            <rect x="11" y="3" width="6" height="6" rx="1" />
+            <rect x="3" y="11" width="6" height="6" rx="1" />
+            <rect x="11" y="11" width="6" height="6" rx="1" />
+          </svg>
+          Grid View
+        </button>
+      </div>
+
+      {/* Org chart container */}
+      <div className="overflow-x-auto rounded-[18px] border border-[#2F3A43] bg-[#171821] p-8">
+        <div className="min-w-[800px] flex justify-center">
+          {teamHierarchy.map((rootMember) => renderMember(rootMember, true))}
+        </div>
+      </div>
+
+      {/* Team summary */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="rounded-[14px] border border-[#323449] bg-[#1B1C24] px-5 py-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Total Members</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">18</p>
+        </div>
+        <div className="rounded-[14px] border border-[#323449] bg-[#1B1C24] px-5 py-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Departments</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">5</p>
+        </div>
+        <div className="rounded-[14px] border border-[#323449] bg-[#1B1C24] px-5 py-4">
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Reporting Lines</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">4</p>
+        </div>
+      </div>
+    </div>
   )
 }
 
@@ -743,33 +991,35 @@ function ProgramTabs({ selected, onSelect }: { selected: string; onSelect: (valu
 
 function ProjectCard({ project }: { project: Project }) {
   return (
-    <article className="rounded-[28px] border border-[#2F303A] bg-surface p-6 text-soft-white shadow-[0_18px_45px_rgba(0,0,0,0.4)]">
-      <div className="flex flex-col gap-8 lg:flex-row">
-        <div className="flex-1 space-y-6">
-          <header className="flex flex-wrap items-start gap-4">
-            <div className="min-w-[200px] flex-1">
-              <p className="font-display text-xs uppercase tracking-[0.35em] text-soft-white/50">Project</p>
-              <h3 className="font-display mt-1 text-2xl font-semibold text-soft-white">{project.name}</h3>
-              <p className="font-sans text-sm text-soft-white/60">{project.category}</p>
+    <Link href={`/dashboard/projects/${project.id}`}>
+      <article className="rounded-[28px] border border-[#2F303A] bg-surface p-6 text-soft-white shadow-[0_18px_45px_rgba(0,0,0,0.4)] transition hover:border-accent/30 cursor-pointer">
+        <div className="flex flex-col gap-8 lg:flex-row">
+          <div className="flex-1 space-y-6">
+            <header className="flex flex-wrap items-start gap-4">
+              <div className="min-w-[200px] flex-1">
+                <p className="font-display text-xs uppercase tracking-[0.35em] text-soft-white/50">Project</p>
+                <h3 className="font-display mt-1 text-2xl font-semibold text-soft-white">{project.name}</h3>
+                <p className="font-sans text-sm text-soft-white/60">{project.category}</p>
+              </div>
+              <StatusBadge status={project.status} />
+            </header>
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <MetaField label="Project Manager" value={project.manager} />
+              <MetaField label="Project Owner" value={project.owner} />
+              <MetaField label="Timeline" value={`${project.start} → ${project.end}`} />
+              <MetaField label="Program" value={programOptions.find((option) => option.value === project.program)?.label ?? project.program} />
+              <MetaField label="Health" value={healthTokens[project.health].label} />
+              <MetaField label="Team">
+                <TeamStack members={project.team} />
+              </MetaField>
             </div>
-            <StatusBadge status={project.status} />
-          </header>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            <MetaField label="Project Manager" value={project.manager} />
-            <MetaField label="Project Owner" value={project.owner} />
-            <MetaField label="Timeline" value={`${project.start} → ${project.end}`} />
-            <MetaField label="Program" value={programOptions.find((option) => option.value === project.program)?.label ?? project.program} />
-            <MetaField label="Health" value={healthTokens[project.health].label} />
-            <MetaField label="Team">
-              <TeamStack members={project.team} />
-            </MetaField>
+            <ProjectDescription text={project.description} />
+            <MilestoneStepper milestones={project.milestones} />
           </div>
-          <ProjectDescription text={project.description} />
-          <MilestoneStepper milestones={project.milestones} />
+          <ProjectAside project={project} />
         </div>
-        <ProjectAside project={project} />
-      </div>
-    </article>
+      </article>
+    </Link>
   )
 }
 
