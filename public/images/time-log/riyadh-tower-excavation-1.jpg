@@ -1,0 +1,8 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#1a1a2e"/>
+  <text x="960" y="400" font-family="Arial" font-size="48" fill="#a9dfd8" text-anchor="middle">PRJ-SAMPLE-001: Al-Riyadh Tower</text>
+  <text x="960" y="480" font-family="Arial" font-size="36" fill="#ffffff" text-anchor="middle">Foundation Excavation - Phase 1</text>
+  <text x="960" y="560" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Equipment: EX-001 (Excavator CAT 320)</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Date: March 28, 2024</text>
+  <text x="960" y="680" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Supervised by: CE-01 (Senior Civil Engineer)</text>
+</svg>

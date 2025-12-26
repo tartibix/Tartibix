@@ -1,0 +1,7 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#2a2a3e"/>
+  <text x="960" y="400" font-family="Arial" font-size="48" fill="#a9dfd8" text-anchor="middle">Foundation Concrete Work</text>
+  <text x="960" y="480" font-family="Arial" font-size="36" fill="#fbbf24" text-anchor="middle">Phase 1 In Progress</text>
+  <text x="960" y="560" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Continuous pour operation - 18 hours</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Quality control team on site</text>
+</svg>

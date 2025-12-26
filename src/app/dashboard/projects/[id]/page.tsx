@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
-import { projectManagementData, type Project } from '@/lib/projectManagementData'
+import { ProjectSetupData, Employee, Equipment, Material, Service, ExecutionPlanTask } from '@/lib/projectSetupTypes'
+import { projectCreateFlowData } from '@/lib/projectCreateFlowData'
 
-const { projects } = projectManagementData
+const { initiativeOptions } = projectCreateFlowData
 
 type TabId = 'overview' | 'documents' | 'team' | 'financials'
 type ViewMode = 'gantt' | 'kanban' | 'timeline'
@@ -264,9 +265,30 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
   const projectId = params.id
   const [activeTab, setActiveTab] = useState<TabId>('overview')
   const [viewMode, setViewMode] = useState<ViewMode>('gantt')
+  const [project, setProject] = useState<ProjectSetupData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Find the project by ID (using first project for demo)
-  const project = projects[0]
+  // Fetch project data from API
+  useEffect(() => {
+    async function fetchProject() {
+      try {
+        const response = await fetch(`/api/projects?id=${projectId}`)
+        if (response.ok) {
+          const data = await response.json()
+          setProject(data)
+        } else {
+          setError('Project not found')
+        }
+      } catch (err) {
+        console.error('Error fetching project:', err)
+        setError('Failed to load project')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProject()
+  }, [projectId])
 
   const tabs: { id: TabId; label: string }[] = [
     { id: 'overview', label: 'Overview' },
@@ -274,6 +296,44 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
     { id: 'team', label: 'Team' },
     { id: 'financials', label: 'Financials' },
   ]
+
+  if (isLoading) {
+    return (
+      <DashboardShell>
+        <TopBar title="Project Management" />
+        <div className="mt-8 flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+            <p className="mt-4 text-soft-white/60">Loading project...</p>
+          </div>
+        </div>
+      </DashboardShell>
+    )
+  }
+
+  if (error || !project) {
+    return (
+      <DashboardShell>
+        <TopBar title="Project Management" />
+        <div className="mt-8 flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="mx-auto h-16 w-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+              <svg className="h-8 w-8 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <p className="text-soft-white/80 text-lg">{error || 'Project not found'}</p>
+            <Link
+              href="/dashboard/projects"
+              className="mt-4 inline-block rounded-full bg-accent px-6 py-2 text-sm font-semibold text-night hover:brightness-110 transition"
+            >
+              Back to Projects
+            </Link>
+          </div>
+        </div>
+      </DashboardShell>
+    )
+  }
 
   return (
     <DashboardShell>
@@ -344,40 +404,150 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
         {/* Tab Content */}
         {activeTab === 'overview' && (
-          <OverviewTab viewMode={viewMode} onViewModeChange={setViewMode} />
+          <OverviewTab viewMode={viewMode} onViewModeChange={setViewMode} project={project} />
         )}
-        {activeTab === 'documents' && <DocumentsTab />}
-        {activeTab === 'team' && <TeamTab />}
-        {activeTab === 'financials' && <FinancialsTab />}
+        {activeTab === 'documents' && <DocumentsTab project={project} />}
+        {activeTab === 'team' && <TeamTab project={project} />}
+        {activeTab === 'financials' && <FinancialsTab project={project} />}
       </section>
     </DashboardShell>
   )
 }
 
 /* ===== Project Header Card ===== */
-function ProjectHeaderCard({ project }: { project: Project }) {
-  const budgetPercent = Math.round((project.budgetUsed / project.budgetTotal) * 100)
+function ProjectHeaderCard({ project }: { project: ProjectSetupData }) {
+  const progress = project.progress || 0
+  const statusLabels: Record<string, string> = {
+    draft: 'Draft',
+    'in-progress': 'In Progress',
+    completed: 'Completed',
+  }
+
+  // Format currency
+  const formatCurrency = (value?: number) => {
+    if (!value) return null
+    return new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(value)
+  }
+
+  // Format date
+  const formatDate = (dateStr?: string) => {
+    if (!dateStr) return null
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' })
+  }
 
   return (
     <div className="rounded-[36px] border border-[#2F303A] bg-surface p-6 shadow-[0_0_10px_rgba(169,223,216,0.4)]">
       <div className="flex flex-wrap gap-6">
         <div className="flex-1 space-y-4">
+          {/* Project Name & Status */}
           <div className="flex flex-wrap gap-3">
             <div className="rounded-full border border-[#323449] bg-night px-5 py-2.5">
-              <span className="text-sm text-soft-white">{project.name}</span>
+              <span className="text-sm text-soft-white font-semibold">{project.projectName}</span>
             </div>
-            <div className="rounded-full border border-[#323449] bg-night px-5 py-2.5">
-              <span className="text-sm text-soft-white">{project.status}</span>
+            <div className={`rounded-full px-5 py-2.5 ${
+              project.status === 'completed' 
+                ? 'bg-[#1f3b30]/70 border border-[#315b48]'
+                : project.status === 'in-progress'
+                ? 'bg-[#3c3514]/70 border border-[#6b591f]'
+                : 'bg-[#232a45]/70 border border-[#3f4c7f]'
+            }`}>
+              <span className={`text-sm ${
+                project.status === 'completed' ? 'text-[#8CDCC7]'
+                : project.status === 'in-progress' ? 'text-[#F7E5AA]'
+                : 'text-[#C5D3FF]'
+              }`}>{statusLabels[project.status] || project.status}</span>
             </div>
-            <div className="rounded-full border border-[#323449] bg-night px-5 py-2.5">
-              <span className="text-sm text-soft-white">{project.manager}</span>
-            </div>
-            <div className="rounded-full border border-[#323449] bg-night px-5 py-2.5">
-              <span className="text-sm text-soft-white">{project.owner}</span>
-            </div>
+            {project.initiative && (
+              <div className="rounded-full border border-[#323449] bg-night px-5 py-2.5">
+                <span className="text-sm text-soft-white/80">
+                  {initiativeOptions.find(opt => opt.value === project.initiative)?.label || project.initiative}
+                </span>
+              </div>
+            )}
           </div>
-          <div className="rounded-full border border-[#323449] bg-night px-6 py-4">
-            <span className="text-sm text-soft-white/80">{project.description}</span>
+
+          {/* Project Details Grid */}
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {project.ownerName && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Owner / Client</p>
+                <p className="text-sm text-soft-white mt-1">{project.ownerName}</p>
+              </div>
+            )}
+            {project.consultantName && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Consultant</p>
+                <p className="text-sm text-soft-white mt-1">{project.consultantName}</p>
+              </div>
+            )}
+            {project.contractNumber && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Contract #</p>
+                <p className="text-sm text-soft-white mt-1">{project.contractNumber}</p>
+              </div>
+            )}
+            {project.contractValue && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Contract Value</p>
+                <p className="text-sm text-accent mt-1 font-semibold">{formatCurrency(project.contractValue)}</p>
+              </div>
+            )}
+            {project.contractStartDate && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Start Date</p>
+                <p className="text-sm text-soft-white mt-1">{formatDate(project.contractStartDate)}</p>
+              </div>
+            )}
+            {project.contractEndDate && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">End Date</p>
+                <p className="text-sm text-soft-white mt-1">{formatDate(project.contractEndDate)}</p>
+              </div>
+            )}
+            {project.projectLocation && (
+              <div className="rounded-2xl border border-[#323449] bg-night px-4 py-3">
+                <p className="text-[10px] uppercase tracking-wider text-soft-white/50">Location</p>
+                <a href={project.projectLocation} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline mt-1 block truncate">
+                  View on Map
+                </a>
+              </div>
+            )}
+          </div>
+
+          {/* Description */}
+          {project.description && (
+            <div className="rounded-2xl border border-[#323449] bg-night px-6 py-4">
+              <span className="text-sm text-soft-white/80">{project.description}</span>
+            </div>
+          )}
+
+          {/* Data Summary */}
+          <div className="flex flex-wrap gap-2">
+            {project.employees && project.employees.length > 0 && (
+              <span className="rounded-full border border-[#323449] bg-night/50 px-3 py-1.5 text-xs text-soft-white/70">
+                {project.employees.length} Employees
+              </span>
+            )}
+            {project.equipment && project.equipment.length > 0 && (
+              <span className="rounded-full border border-[#323449] bg-night/50 px-3 py-1.5 text-xs text-soft-white/70">
+                {project.equipment.length} Equipment
+              </span>
+            )}
+            {project.materials && project.materials.length > 0 && (
+              <span className="rounded-full border border-[#323449] bg-night/50 px-3 py-1.5 text-xs text-soft-white/70">
+                {project.materials.length} Materials
+              </span>
+            )}
+            {project.services && project.services.length > 0 && (
+              <span className="rounded-full border border-[#323449] bg-night/50 px-3 py-1.5 text-xs text-soft-white/70">
+                {project.services.length} Services
+              </span>
+            )}
+            {project.executionPlan && project.executionPlan.length > 0 && (
+              <span className="rounded-full border border-[#323449] bg-night/50 px-3 py-1.5 text-xs text-soft-white/70">
+                {project.executionPlan.length} Tasks
+              </span>
+            )}
           </div>
         </div>
         {/* Progress Ring */}
@@ -399,12 +569,12 @@ function ProjectHeaderCard({ project }: { project: Project }) {
                 fill="none"
                 stroke="#38EE4A"
                 strokeWidth="10"
-                strokeDasharray={`${(project.progress / 100) * 314} 314`}
+                strokeDasharray={`${(progress / 100) * 314} 314`}
                 strokeLinecap="round"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="font-display text-2xl font-semibold text-soft-white">{project.progress}%</span>
+              <span className="font-display text-2xl font-semibold text-soft-white">{progress}%</span>
             </div>
           </div>
         </div>
@@ -414,7 +584,7 @@ function ProjectHeaderCard({ project }: { project: Project }) {
 }
 
 /* ===== Overview Tab ===== */
-function OverviewTab({ viewMode, onViewModeChange }: { viewMode: ViewMode; onViewModeChange: (mode: ViewMode) => void }) {
+function OverviewTab({ viewMode, onViewModeChange, project }: { viewMode: ViewMode; onViewModeChange: (mode: ViewMode) => void; project: ProjectSetupData }) {
   const viewModes: { id: ViewMode; label: string }[] = [
     { id: 'gantt', label: 'Gantt' },
     { id: 'kanban', label: 'Kanban' },
@@ -442,24 +612,58 @@ function OverviewTab({ viewMode, onViewModeChange }: { viewMode: ViewMode; onVie
       </div>
 
       {/* View Content */}
-      {viewMode === 'gantt' && <GanttView />}
-      {viewMode === 'kanban' && <KanbanView />}
-      {viewMode === 'timeline' && <TimelineView />}
+      {viewMode === 'gantt' && <GanttView project={project} />}
+      {viewMode === 'kanban' && <KanbanView project={project} />}
+      {viewMode === 'timeline' && <TimelineView project={project} />}
     </div>
   )
 }
 
 /* ===== Gantt View ===== */
-function GanttView() {
-  const months = ['January', 'February', 'March', 'April']
-  const weeks = Array.from({ length: 16 }, (_, i) => i + 1)
+function GanttView({ project }: { project: ProjectSetupData }) {
+  const tasks = project.executionPlan || []
+  
+  // Get date range from tasks
+  const dates = tasks.flatMap(t => [t.startDate, t.endDate].filter(Boolean))
+  const minDate = dates.length > 0 ? new Date(Math.min(...dates.map(d => new Date(d).getTime()))) : new Date()
+  const maxDate = dates.length > 0 ? new Date(Math.max(...dates.map(d => new Date(d).getTime()))) : new Date()
+  
+  // Calculate total days span
+  const totalDays = Math.max(Math.ceil((maxDate.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24)), 30)
+  
+  // Generate month headers based on date range
+  const months: string[] = []
+  const currentDate = new Date(minDate)
+  while (currentDate <= maxDate) {
+    const monthName = currentDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    if (!months.includes(monthName)) {
+      months.push(monthName)
+    }
+    currentDate.setMonth(currentDate.getMonth() + 1)
+  }
+  if (months.length === 0) months.push('No Data')
+
+  // Colors for tasks
+  const colors = ['#A9DFD8', '#FFE48C', '#C5D3FF', '#F8B4B4', '#34D399', '#FBBF24', '#60A5FA', '#F472B6']
+
+  if (tasks.length === 0) {
+    return (
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface p-12 text-center">
+        <svg className="mx-auto h-16 w-16 text-soft-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p className="mt-4 text-lg text-soft-white/60">No execution plan tasks yet</p>
+        <p className="mt-2 text-sm text-soft-white/40">Add tasks in the project setup to see them here</p>
+      </div>
+    )
+  }
 
   return (
     <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6 overflow-x-auto">
       <div className="min-w-[1000px]">
         {/* Month Headers */}
         <div className="flex border-b border-[#323449] pb-4">
-          <div className="w-[150px] shrink-0" />
+          <div className="w-[200px] shrink-0" />
           {months.map((month) => (
             <div key={month} className="flex-1 text-center">
               <span className="font-display text-sm font-semibold text-soft-white">{month}</span>
@@ -467,37 +671,36 @@ function GanttView() {
           ))}
         </div>
 
-        {/* Week Headers */}
-        <div className="flex border-b border-[#323449] py-2">
-          <div className="w-[150px] shrink-0" />
-          {weeks.map((week) => (
-            <div key={week} className="flex-1 text-center">
-              <span className="text-xs text-soft-white/50">W{week}</span>
-            </div>
-          ))}
-        </div>
-
         {/* Gantt Bars */}
         <div className="mt-4 space-y-3">
-          {ganttTasks.map((task) => (
-            <div key={task.id} className="flex items-center">
-              <div className="w-[150px] shrink-0 pr-4">
-                <span className="text-sm text-soft-white">{task.name}</span>
-              </div>
-              <div className="relative flex-1 h-10">
-                <div
-                  className="absolute top-1/2 -translate-y-1/2 h-8 rounded-lg flex items-center px-3"
-                  style={{
-                    left: `${(task.start / 16) * 100}%`,
-                    width: `${(task.duration / 16) * 100}%`,
-                    backgroundColor: task.color,
-                  }}
-                >
-                  <span className="text-xs font-medium text-night truncate">{task.phase}</span>
+          {tasks.map((task, index) => {
+            const taskStart = new Date(task.startDate)
+            const taskEnd = new Date(task.endDate)
+            const startOffset = Math.max(0, (taskStart.getTime() - minDate.getTime()) / (1000 * 60 * 60 * 24))
+            const duration = Math.max(1, (taskEnd.getTime() - taskStart.getTime()) / (1000 * 60 * 60 * 24))
+            const color = colors[index % colors.length]
+
+            return (
+              <div key={task.id} className="flex items-center">
+                <div className="w-[200px] shrink-0 pr-4">
+                  <span className="text-sm text-soft-white">{task.taskName}</span>
+                  <span className="text-xs text-soft-white/50 block">{task.taskId}</span>
+                </div>
+                <div className="relative flex-1 h-10">
+                  <div
+                    className="absolute top-1/2 -translate-y-1/2 h-8 rounded-lg flex items-center px-3"
+                    style={{
+                      left: `${(startOffset / totalDays) * 100}%`,
+                      width: `${Math.max((duration / totalDays) * 100, 5)}%`,
+                      backgroundColor: color,
+                    }}
+                  >
+                    <span className="text-xs font-medium text-night truncate">{task.taskName}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>
@@ -505,10 +708,40 @@ function GanttView() {
 }
 
 /* ===== Kanban View ===== */
-function KanbanView() {
+function KanbanView({ project }: { project: ProjectSetupData }) {
+  const tasks = project.executionPlan || []
+  
+  // Group tasks by a simple status based on dates
+  const today = new Date()
+  const backlog = tasks.filter(t => new Date(t.startDate) > today)
+  const inProgress = tasks.filter(t => {
+    const start = new Date(t.startDate)
+    const end = new Date(t.endDate)
+    return start <= today && end >= today
+  })
+  const completed = tasks.filter(t => new Date(t.endDate) < today)
+
+  const columns = [
+    { id: 'backlog', title: 'Backlog', tasks: backlog },
+    { id: 'in-progress', title: 'In Progress', tasks: inProgress },
+    { id: 'completed', title: 'Completed', tasks: completed },
+  ]
+
+  if (tasks.length === 0) {
+    return (
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface p-12 text-center">
+        <svg className="mx-auto h-16 w-16 text-soft-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p className="mt-4 text-lg text-soft-white/60">No execution plan tasks yet</p>
+        <p className="mt-2 text-sm text-soft-white/40">Add tasks in the project setup to see them here</p>
+      </div>
+    )
+  }
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4">
-      {kanbanColumns.map((column) => (
+      {columns.map((column) => (
         <div
           key={column.id}
           className="w-[355px] shrink-0 rounded-lg bg-surface border border-[#323449] shadow-[0_2px_3px_rgba(0,0,0,0.25)]"
@@ -516,32 +749,18 @@ function KanbanView() {
           {/* Column Header */}
           <div className="flex items-center justify-between border-b border-[#323449] bg-[#323449] px-5 py-3 rounded-t-lg">
             <span className="font-display text-base font-medium text-soft-white">{column.title}</span>
-            <button type="button" className="text-soft-white/60 hover:text-soft-white">
-              <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                <circle cx="4" cy="10" r="2" />
-                <circle cx="10" cy="10" r="2" />
-                <circle cx="16" cy="10" r="2" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Add Task Button */}
-          <div className="p-4">
-            <button
-              type="button"
-              className="flex w-full items-center justify-center rounded-lg border-2 border-dashed border-[#323449] py-3 text-soft-white/50 transition hover:border-accent/50 hover:text-accent"
-            >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="2">
-                <path d="M10 5v10M5 10h10" />
-              </svg>
-            </button>
+            <span className="text-xs text-soft-white/60 bg-night px-2 py-1 rounded-full">{column.tasks.length}</span>
           </div>
 
           {/* Task Cards */}
-          <div className="space-y-4 px-4 pb-4">
-            {column.tasks.map((task) => (
-              <TaskCard key={task.id} task={task} />
-            ))}
+          <div className="space-y-4 p-4">
+            {column.tasks.length === 0 ? (
+              <p className="text-center text-sm text-soft-white/40 py-4">No tasks</p>
+            ) : (
+              column.tasks.map((task) => (
+                <RealTaskCard key={task.id} task={task} employees={project.employees} />
+              ))
+            )}
           </div>
         </div>
       ))}
@@ -549,72 +768,108 @@ function KanbanView() {
   )
 }
 
-function TaskCard({ task }: { task: typeof kanbanColumns[number]['tasks'][number] }) {
+function RealTaskCard({ task, employees }: { task: ExecutionPlanTask; employees: Employee[] }) {
+  // Calculate days until end date
+  const endDate = new Date(task.endDate)
+  const today = new Date()
+  const daysLeft = Math.max(0, Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)))
+  
+  // Find assigned employee
+  const assignedEmployee = employees.find(e => e.employeeCode === task.employeeCode)
+
   return (
     <div className="rounded-lg border border-[#323449] bg-surface p-4 shadow-[0_0_3px_1px_rgba(0,0,0,0.15)]">
       <div className="flex items-start justify-between mb-3">
-        <h4 className="font-display text-base font-medium text-soft-white">{task.title}</h4>
+        <div>
+          <h4 className="font-display text-base font-medium text-soft-white">{task.taskName}</h4>
+          <span className="text-xs text-soft-white/50">{task.taskId}</span>
+        </div>
         <div className="flex items-center gap-1 text-soft-white/50">
           <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
             <circle cx="10" cy="10" r="8" />
             <path d="M10 6v4l2 2" />
           </svg>
-          <span className="text-xs">{task.daysLeft} Days</span>
+          <span className="text-xs">{daysLeft} Days</span>
         </div>
       </div>
-      <p className="text-sm text-soft-white/60 mb-4 line-clamp-2">{task.description}</p>
+      <div className="text-xs text-soft-white/60 space-y-1 mb-3">
+        <p>Start: {new Date(task.startDate).toLocaleDateString()}</p>
+        <p>End: {new Date(task.endDate).toLocaleDateString()}</p>
+      </div>
+      {task.notes && (
+        <p className="text-sm text-soft-white/60 mb-4 line-clamp-2">{task.notes}</p>
+      )}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4 text-soft-white/50">
-          <div className="flex items-center gap-1">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
-              <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path d="M2 17v-1a7 7 0 017-7h2a7 7 0 017 7v1" />
-            </svg>
-            <span className="text-xs">{task.attachments}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
-              <path d="M8 10h4M8 14h2M6 18h8a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-            <span className="text-xs">{task.comments}</span>
-          </div>
+        <div className="flex items-center gap-2 text-soft-white/50">
+          {task.employeeCount && (
+            <div className="flex items-center gap-1">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path d="M2 17v-1a7 7 0 017-7h2a7 7 0 017 7v1" />
+              </svg>
+              <span className="text-xs">{task.employeeCount}</span>
+            </div>
+          )}
+          {task.equipmentCount && (
+            <div className="flex items-center gap-1">
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+                <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+              </svg>
+              <span className="text-xs">{task.equipmentCount}</span>
+            </div>
+          )}
         </div>
-        <div className="flex items-center">
-          <button
-            type="button"
-            className="flex h-6 w-6 items-center justify-center rounded-full border border-dashed border-soft-white/30 text-soft-white/50 hover:border-accent hover:text-accent"
-          >
-            <svg className="h-3 w-3" fill="none" viewBox="0 0 12 12" stroke="currentColor" strokeWidth="2">
-              <path d="M6 3v6M3 6h6" />
-            </svg>
-          </button>
-          <div className="flex -space-x-2 ml-2">
-            {task.assignees.map((initials, index) => (
-              <div
-                key={index}
-                className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-[10px] font-semibold text-soft-white"
-              >
-                {initials}
-              </div>
-            ))}
+        {assignedEmployee && (
+          <div className="flex items-center gap-2">
+            <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-[10px] font-semibold text-soft-white">
+              {assignedEmployee.jobTitle.substring(0, 2).toUpperCase()}
+            </div>
+            <span className="text-xs text-soft-white/60">{assignedEmployee.jobTitle}</span>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
 }
 
 /* ===== Timeline View ===== */
-function TimelineView() {
+function TimelineView({ project }: { project: ProjectSetupData }) {
+  const tasks = project.executionPlan || []
+  
+  // Group tasks by month
+  const tasksByMonth = tasks.reduce((acc, task) => {
+    const date = new Date(task.startDate)
+    const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+    if (!acc[monthKey]) {
+      acc[monthKey] = []
+    }
+    acc[monthKey].push(task)
+    return acc
+  }, {} as Record<string, ExecutionPlanTask[]>)
+
+  const months = Object.keys(tasksByMonth).sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
+
+  if (tasks.length === 0) {
+    return (
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface p-12 text-center">
+        <svg className="mx-auto h-16 w-16 text-soft-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <p className="mt-4 text-lg text-soft-white/60">No execution plan tasks yet</p>
+        <p className="mt-2 text-sm text-soft-white/40">Add tasks in the project setup to see them here</p>
+      </div>
+    )
+  }
+
   return (
     <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6 overflow-x-auto">
       <div className="min-w-[1000px]">
-        {/* Year Headers */}
+        {/* Month Headers */}
         <div className="flex items-end justify-between mb-8 relative">
           <div className="absolute bottom-0 left-0 right-0 h-px bg-[#323449]" />
-          {timelineYears.map((year) => (
-            <div key={year} className="relative text-center flex-1">
-              <span className="font-display text-xl font-semibold text-soft-white">{year}</span>
+          {months.map((month) => (
+            <div key={month} className="relative text-center flex-1">
+              <span className="font-display text-lg font-semibold text-soft-white">{month}</span>
               <div className="absolute left-1/2 -translate-x-1/2 bottom-[-20px]">
                 <div className="h-6 w-6 rounded-full border-4 border-accent bg-night" />
               </div>
@@ -623,38 +878,42 @@ function TimelineView() {
         </div>
 
         {/* Timeline Cards */}
-        <div className="grid grid-cols-5 gap-6 mt-16">
-          {timelineTasks.map((task, index) => (
-            <div
-              key={task.id}
-              className="rounded-[14px] border border-[#323449] bg-night p-4"
-            >
-              <h4 className="font-display text-base font-medium text-soft-white mb-2">{task.title}</h4>
-              <p className="text-xs text-soft-white/60 mb-4 line-clamp-4">{task.description}</p>
-              <div className="flex items-center justify-between text-soft-white/50">
-                <div className="flex items-center gap-1">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <span className="text-xs">5</span>
+        <div className={`grid gap-6 mt-16`} style={{ gridTemplateColumns: `repeat(${months.length}, 1fr)` }}>
+          {months.map((month) => (
+            <div key={month} className="space-y-4">
+              {tasksByMonth[month].map((task) => (
+                <div
+                  key={task.id}
+                  className="rounded-[14px] border border-[#323449] bg-night p-4"
+                >
+                  <h4 className="font-display text-base font-medium text-soft-white mb-1">{task.taskName}</h4>
+                  <span className="text-xs text-soft-white/50">{task.taskId}</span>
+                  <div className="mt-2 text-xs text-soft-white/60">
+                    <p>{new Date(task.startDate).toLocaleDateString()} - {new Date(task.endDate).toLocaleDateString()}</p>
+                  </div>
+                  {task.notes && (
+                    <p className="text-xs text-soft-white/50 mt-2 line-clamp-2">{task.notes}</p>
+                  )}
+                  <div className="flex items-center gap-3 mt-3 text-soft-white/50">
+                    {task.employeeCount && (
+                      <div className="flex items-center gap-1">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <span className="text-xs">{task.employeeCount}</span>
+                      </div>
+                    )}
+                    {task.equipmentCount && (
+                      <div className="flex items-center gap-1">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
+                          <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
+                        </svg>
+                        <span className="text-xs">{task.equipmentCount}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M8 10h4M8 14h2" />
-                  </svg>
-                  <span className="text-xs">8</span>
-                </div>
-                <div className="flex -space-x-1">
-                  {['JD', 'AM', 'SK'].map((initials, i) => (
-                    <div
-                      key={i}
-                      className="flex h-5 w-5 items-center justify-center rounded-full border border-white bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-[8px] font-semibold text-soft-white"
-                    >
-                      {initials}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              ))}
             </div>
           ))}
         </div>
@@ -664,45 +923,51 @@ function TimelineView() {
 }
 
 /* ===== Documents Tab ===== */
-function DocumentsTab() {
+function DocumentsTab({ project }: { project: ProjectSetupData }) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const allDocuments = project.supportingDocuments || []
+
+  // Count documents per category
+  const getDocumentCount = (categoryId: string) => {
+    return allDocuments.filter(doc => doc.category === categoryId).length
+  }
 
   if (selectedCategory) {
-    return <DocumentsListView categoryId={selectedCategory} onBack={() => setSelectedCategory(null)} />
+    return <DocumentsListView categoryId={selectedCategory} onBack={() => setSelectedCategory(null)} project={project} />
   }
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {documentCategories.map((category) => (
-        <button
-          key={category.id}
-          type="button"
-          onClick={() => setSelectedCategory(category.id)}
-          className="group flex flex-col items-center rounded-[20px] border border-[#323449] bg-surface p-8 text-center transition hover:border-accent/50"
-        >
-          <div
-            className="flex h-20 w-20 items-center justify-center rounded-[20px] mb-4"
-            style={{ backgroundColor: `${category.color}20` }}
+      {documentCategories.map((category) => {
+        const count = getDocumentCount(category.id)
+        return (
+          <button
+            key={category.id}
+            type="button"
+            onClick={() => setSelectedCategory(category.id)}
+            className="group flex flex-col items-center rounded-[20px] border border-[#323449] bg-surface p-8 text-center transition hover:border-accent/50"
           >
-            {DocumentIcons[category.id as keyof typeof DocumentIcons](category.color)}
-          </div>
-          <h3 className="font-display text-lg font-semibold text-soft-white">{category.name}</h3>
-        </button>
-      ))}
+            <div
+              className="flex h-20 w-20 items-center justify-center rounded-[20px] mb-4"
+              style={{ backgroundColor: `${category.color}20` }}
+            >
+              {DocumentIcons[category.id as keyof typeof DocumentIcons](category.color)}
+            </div>
+            <h3 className="font-display text-lg font-semibold text-soft-white">{category.name}</h3>
+            <span className="mt-2 text-sm text-soft-white/50">{count} {count === 1 ? 'document' : 'documents'}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
 
-function DocumentsListView({ categoryId, onBack }: { categoryId: string; onBack: () => void }) {
+function DocumentsListView({ categoryId, onBack, project }: { categoryId: string; onBack: () => void; project: ProjectSetupData }) {
   const category = documentCategories.find((c) => c.id === categoryId)
   
-  const documents = [
-    { id: 'd1', name: 'Contract Agreement', type: 'PDF', version: '1.2', lastModified: '2024-01-15', uploadedBy: 'John Doe' },
-    { id: 'd2', name: 'NDA Document', type: 'PDF', version: '1.0', lastModified: '2024-01-14', uploadedBy: 'Jane Smith' },
-    { id: 'd3', name: 'Terms of Service', type: 'DOCX', version: '2.1', lastModified: '2024-01-12', uploadedBy: 'Mike Johnson' },
-    { id: 'd4', name: 'Privacy Policy', type: 'PDF', version: '1.5', lastModified: '2024-01-10', uploadedBy: 'Sarah Wilson' },
-    { id: 'd5', name: 'Service Agreement', type: 'PDF', version: '1.0', lastModified: '2024-01-08', uploadedBy: 'Tom Brown' },
-  ]
+  // Filter documents by selected category
+  const allDocuments = project.supportingDocuments || []
+  const documents = allDocuments.filter(doc => doc.category === categoryId)
 
   return (
     <div className="space-y-6">
@@ -725,7 +990,7 @@ function DocumentsListView({ categoryId, onBack }: { categoryId: string; onBack:
             <div>
               <h2 className="font-display text-xl font-semibold text-soft-white">{category?.name}</h2>
               <p className="text-sm text-soft-white/60">
-                This is the project&apos;s legal foundation. This section contains all signed agreements, tender documents, the Letter of Award (LOA), and bank guarantees.
+                Project documents and supporting files for {project.projectName}
               </p>
             </div>
           </div>
@@ -734,15 +999,23 @@ function DocumentsListView({ categoryId, onBack }: { categoryId: string; onBack:
 
       {/* Documents Table */}
       <div className="rounded-[18px] border border-[#2F303A] bg-surface overflow-hidden">
+        {documents.length === 0 ? (
+          <div className="p-12 text-center">
+            <svg className="mx-auto h-12 w-12 text-soft-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <p className="mt-4 text-soft-white/60">No documents uploaded yet</p>
+          </div>
+        ) : (
         <table className="w-full">
           <thead>
             <tr className="border-b border-[#323449] text-left text-xs uppercase tracking-wider text-soft-white/50">
               <th className="px-6 py-4 font-medium">#</th>
               <th className="px-6 py-4 font-medium">Document Name</th>
               <th className="px-6 py-4 font-medium">Document Type</th>
-              <th className="px-6 py-4 font-medium">Version</th>
-              <th className="px-6 py-4 font-medium">Last Modified</th>
-              <th className="px-6 py-4 font-medium">Uploaded By</th>
+              <th className="px-6 py-4 font-medium">Category</th>
+              <th className="px-6 py-4 font-medium">Upload Date</th>
+              <th className="px-6 py-4 font-medium">Size</th>
               <th className="px-6 py-4 font-medium">Actions</th>
             </tr>
           </thead>
@@ -750,11 +1023,11 @@ function DocumentsListView({ categoryId, onBack }: { categoryId: string; onBack:
             {documents.map((doc, index) => (
               <tr key={doc.id} className="border-b border-[#323449]/50 last:border-0">
                 <td className="px-6 py-4 text-sm text-soft-white/70">{String(index + 1).padStart(2, '0')}</td>
-                <td className="px-6 py-4 text-sm text-soft-white">{doc.name}</td>
-                <td className="px-6 py-4 text-sm text-soft-white/70">{doc.type}</td>
-                <td className="px-6 py-4 text-sm text-soft-white/70">{doc.version}</td>
-                <td className="px-6 py-4 text-sm text-soft-white/70">{doc.lastModified}</td>
-                <td className="px-6 py-4 text-sm text-soft-white/70">{doc.uploadedBy}</td>
+                <td className="px-6 py-4 text-sm text-soft-white">{doc.fileName}</td>
+                <td className="px-6 py-4 text-sm text-soft-white/70">{doc.fileType.toUpperCase()}</td>
+                <td className="px-6 py-4 text-sm text-soft-white/70 capitalize">{doc.category}</td>
+                <td className="px-6 py-4 text-sm text-soft-white/70">{new Date(doc.uploadDate).toLocaleDateString()}</td>
+                <td className="px-6 py-4 text-sm text-soft-white/70">{(doc.fileSize / 1024).toFixed(1)} KB</td>
                 <td className="px-6 py-4">
                   <button
                     type="button"
@@ -767,297 +1040,400 @@ function DocumentsListView({ categoryId, onBack }: { categoryId: string; onBack:
             ))}
           </tbody>
         </table>
+        )}
       </div>
     </div>
   )
 }
 
 /* ===== Team Tab ===== */
-function TeamTab() {
-  const renderMember = (member: any, isRoot = false, depth = 0) => {
-    const hasChildren = member.children && member.children.length > 0
+function TeamTab({ project }: { project: ProjectSetupData }) {
+  const employees = project.employees || []
 
+  // Calculate total daily cost
+  const totalDailyCost = employees.reduce((sum, emp) => sum + (emp.dailyCost || 0), 0)
+
+  // Build hierarchy based on rank levels
+  // Define rank hierarchy order (top to bottom)
+  const rankHierarchy: Record<string, number> = {
+    'Senior Manager': 1,
+    'Manager': 2,
+    'Senior Engineer': 3,
+    'Senior Architect': 4,
+    'Senior Surveyor': 3,
+    'Engineer': 4,
+    'Architect': 4,
+    'Surveyor': 4,
+    'Officer': 5,
+    'Coordinator': 5,
+    'Other': 6,
+  }
+
+  // Group employees by their hierarchy level
+  const getRankLevel = (rank: string) => rankHierarchy[rank] || 6
+  
+  // Sort employees by rank level
+  const sortedEmployees = [...employees].sort((a, b) => {
+    return getRankLevel(a.rank) - getRankLevel(b.rank)
+  })
+
+  // Get unique rank levels that exist in this project
+  const uniqueRankLevels = [...new Set(sortedEmployees.map(emp => getRankLevel(emp.rank)))].sort((a, b) => a - b)
+
+  if (employees.length === 0) {
     return (
-      <div key={member.id} className="flex flex-col items-center">
-        {/* Connector from parent */}
-        {!isRoot && (
-          <div className="h-6 w-px bg-[#323449]" />
-        )}
-        
-        {/* Member Card */}
-        <div
-          className={`rounded-[14px] border px-6 py-4 text-center transition hover:border-accent/50 ${
-            isRoot
-              ? 'border-accent/40 bg-gradient-to-b from-[#1B1C24] to-[#1a2428]'
-              : 'border-[#323449] bg-night'
-          }`}
-          style={{ minWidth: '180px' }}
-        >
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-sm font-display font-semibold text-soft-white mb-2">
-            {member.name.split(' ').map((n: string) => n[0]).join('')}
-          </div>
-          <p className="font-display text-sm font-semibold text-soft-white">{member.name}</p>
-          <p className="text-xs text-soft-white/60">{member.role}</p>
-          <p className="text-[10px] text-soft-white/40 mt-1">Employee ID: {member.employeeId}</p>
-        </div>
-
-        {/* Children */}
-        {hasChildren && (
-          <>
-            <div className="h-6 w-px bg-[#323449]" />
-            {member.children.length > 1 && (
-              <div
-                className="h-px bg-[#323449]"
-                style={{ width: `${member.children.length * 200}px` }}
-              />
-            )}
-            <div className="flex gap-8 mt-0">
-              {member.children.map((child: any) => renderMember(child, false, depth + 1))}
-            </div>
-          </>
-        )}
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface p-12 text-center">
+        <svg className="mx-auto h-16 w-16 text-soft-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+        </svg>
+        <p className="mt-4 text-lg text-soft-white/60">No team members yet</p>
+        <p className="mt-2 text-sm text-soft-white/40">Add employees in the project setup to see them here</p>
       </div>
     )
   }
 
   return (
     <div className="space-y-6">
-      {/* Org Chart */}
-      <div className="rounded-[18px] border border-[#2F303A] bg-[#171821] p-8 overflow-x-auto">
-        <div className="min-w-[1000px] flex justify-center">
-          {renderMember(teamHierarchy.projectManager, true)}
-        </div>
-      </div>
-
       {/* Team Summary */}
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
           <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Total Members</p>
-          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">12</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">{employees.length}</p>
         </div>
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Departments</p>
-          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">4</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Hierarchy Levels</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">{uniqueRankLevels.length}</p>
         </div>
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Reporting Lines</p>
-          <p className="font-display mt-1 text-2xl font-semibold text-soft-white">3</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50">Daily Team Cost</p>
+          <p className="font-display mt-1 text-2xl font-semibold text-accent">
+            {new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(totalDailyCost)}
+          </p>
         </div>
+      </div>
+
+      {/* Team Hierarchy Tree */}
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
+        <h3 className="font-display text-lg font-semibold text-soft-white mb-6">Team Hierarchy</h3>
+        <TeamHierarchyTree employees={sortedEmployees} rankHierarchy={rankHierarchy} />
+      </div>
+
+      {/* Employee Table */}
+      <div className="rounded-[18px] border border-[#2F303A] bg-surface overflow-hidden">
+        <div className="px-6 py-4 border-b border-[#323449]">
+          <h3 className="font-display text-lg font-semibold text-soft-white">All Team Members</h3>
+        </div>
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-[#323449] text-left text-xs uppercase tracking-wider text-soft-white/50">
+              <th className="px-6 py-4 font-medium">#</th>
+              <th className="px-6 py-4 font-medium">Employee Code</th>
+              <th className="px-6 py-4 font-medium">Job Title</th>
+              <th className="px-6 py-4 font-medium">Rank</th>
+              <th className="px-6 py-4 font-medium">Daily Cost</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((emp, index) => (
+              <tr key={emp.id} className="border-b border-[#323449]/50 last:border-0">
+                <td className="px-6 py-4 text-sm text-soft-white/70">{String(index + 1).padStart(2, '0')}</td>
+                <td className="px-6 py-4 text-sm text-soft-white">{emp.employeeCode}</td>
+                <td className="px-6 py-4 text-sm text-soft-white">{emp.jobTitle}</td>
+                <td className="px-6 py-4 text-sm text-soft-white/70">{emp.rank}</td>
+                <td className="px-6 py-4 text-sm text-accent font-semibold">
+                  {new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(emp.dailyCost)}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   )
 }
 
+/* ===== Team Hierarchy Tree Component ===== */
+function TeamHierarchyTree({ employees, rankHierarchy }: { employees: Employee[]; rankHierarchy: Record<string, number> }) {
+  const getRankLevel = (rank: string) => rankHierarchy[rank] || 6
+  
+  // Group employees by rank level
+  const employeesByLevel = employees.reduce((acc, emp) => {
+    const level = getRankLevel(emp.rank)
+    if (!acc[level]) {
+      acc[level] = []
+    }
+    acc[level].push(emp)
+    return acc
+  }, {} as Record<number, Employee[]>)
+
+  const levels = Object.keys(employeesByLevel).map(Number).sort((a, b) => a - b)
+
+  return (
+    <div className="relative">
+      {levels.map((level, levelIndex) => {
+        const levelEmployees = employeesByLevel[level]
+        const isFirst = levelIndex === 0
+        const isLast = levelIndex === levels.length - 1
+
+        return (
+          <div key={level} className="relative">
+            {/* Vertical connecting line from previous level */}
+            {!isFirst && (
+              <div className="absolute left-1/2 -top-6 h-6 w-px bg-[#323449]" />
+            )}
+            
+            {/* Level container */}
+            <div className={`flex flex-wrap justify-center gap-4 ${!isLast ? 'pb-12' : ''}`}>
+              {levelEmployees.map((employee, empIndex) => (
+                <div key={employee.id} className="relative">
+                  {/* Horizontal line to siblings */}
+                  {levelEmployees.length > 1 && empIndex === 0 && (
+                    <div 
+                      className="absolute top-0 left-1/2 h-px bg-[#323449]" 
+                      style={{ width: `${(levelEmployees.length - 1) * 200}px` }}
+                    />
+                  )}
+                  
+                  {/* Employee Card */}
+                  <div className="relative flex flex-col items-center">
+                    {/* Vertical line down to next level */}
+                    {!isLast && empIndex === Math.floor(levelEmployees.length / 2) && (
+                      <div className="absolute -bottom-12 left-1/2 h-12 w-px bg-[#323449]" />
+                    )}
+                    
+                    <div className={`rounded-[14px] border bg-night p-4 w-[180px] text-center transition hover:border-accent/50 ${
+                      level === 1 ? 'border-accent/50 shadow-[0_0_15px_rgba(169,223,216,0.2)]' : 'border-[#323449]'
+                    }`}>
+                      <div className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full text-sm font-display font-semibold mb-3 ${
+                        level === 1 
+                          ? 'bg-accent/20 text-accent' 
+                          : level === 2 
+                          ? 'bg-[#FFE48C]/20 text-[#FFE48C]'
+                          : 'bg-gradient-to-br from-[#2B3A42] to-[#1D2528] text-soft-white'
+                      }`}>
+                        {employee.jobTitle.substring(0, 2).toUpperCase()}
+                      </div>
+                      <p className="font-display text-sm font-semibold text-soft-white truncate">{employee.jobTitle}</p>
+                      <p className="text-xs text-soft-white/50 mt-1">{employee.employeeCode}</p>
+                      <div className="mt-2 pt-2 border-t border-[#323449]">
+                        <span className={`text-[10px] uppercase tracking-wider px-2 py-1 rounded-full ${
+                          level === 1 
+                            ? 'bg-accent/10 text-accent' 
+                            : level === 2 
+                            ? 'bg-[#FFE48C]/10 text-[#FFE48C]'
+                            : 'bg-[#323449] text-soft-white/60'
+                        }`}>
+                          {employee.rank}
+                        </span>
+                      </div>
+                      <p className="text-xs text-accent font-semibold mt-2">
+                        {new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(employee.dailyCost)}/day
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ===== Financials Tab ===== */
-function FinancialsTab() {
+function FinancialsTab({ project }: { project: ProjectSetupData }) {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+    return new Intl.NumberFormat('en-SA', {
+      style: 'currency',
+      currency: 'SAR',
+      maximumFractionDigits: 0,
     }).format(value)
   }
+
+  // Calculate costs from project data
+  const employees = project.employees || []
+  const materials = project.materials || []
+  const equipment = project.equipment || []
+  
+  const totalEmployeeDailyCost = employees.reduce((sum, emp) => sum + (emp.dailyCost || 0), 0)
+  const totalMaterialsValue = materials.reduce((sum, mat) => sum + (mat.estimatedValue || 0), 0)
+  const totalEquipmentDailyCost = equipment.reduce((sum, eq) => sum + (eq.dailyCost || 0), 0)
+  
+  const estimatedTotalCost = totalEmployeeDailyCost * 30 + totalMaterialsValue + totalEquipmentDailyCost * 30
+  const contractValue = project.contractValue || 0
+  const estimatedProfit = contractValue - estimatedTotalCost
+
+  // Cost breakdown
+  const costBreakdown = [
+    { label: 'Labor', value: totalEmployeeDailyCost * 30, color: '#A9DFD8' },
+    { label: 'Materials', value: totalMaterialsValue, color: '#FFE48C' },
+    { label: 'Equipment', value: totalEquipmentDailyCost * 30, color: '#C5D3FF' },
+  ].filter(item => item.value > 0)
+
+  const totalBreakdown = costBreakdown.reduce((sum, item) => sum + item.value, 0)
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Original Contract Value</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Contract Value</p>
           <p className="font-display text-xl font-semibold text-soft-white">
-            ${formatCurrency(financialData.originalContractValue)}
+            {formatCurrency(contractValue)}
           </p>
         </div>
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Actual Costs to Date</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Estimated Costs</p>
           <p className="font-display text-xl font-semibold text-soft-white">
-            ${formatCurrency(financialData.actualCostsToDate)}
+            {formatCurrency(estimatedTotalCost)}
           </p>
         </div>
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Total Invoiced</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Materials Value</p>
           <p className="font-display text-xl font-semibold text-soft-white">
-            ${formatCurrency(financialData.totalInvoiced)}
+            {formatCurrency(totalMaterialsValue)}
           </p>
         </div>
         <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Projected Profit</p>
-          <p className="font-display text-xl font-semibold text-soft-white">
-            ${formatCurrency(financialData.projectedProfit)}
+          <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Estimated Profit</p>
+          <p className={`font-display text-xl font-semibold ${estimatedProfit >= 0 ? 'text-[#63FFC9]' : 'text-[#FF9BB0]'}`}>
+            {formatCurrency(estimatedProfit)}
           </p>
         </div>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Payment Milestones */}
+        {/* Resource Costs */}
         <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
-          <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Payment Milestones</h3>
+          <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Daily Resource Costs</h3>
           <table className="w-full">
             <thead>
               <tr className="border-b border-[#323449] text-left text-xs uppercase tracking-wider text-soft-white/50">
-                <th className="pb-3 font-medium">#</th>
-                <th className="pb-3 font-medium">Time</th>
-                <th className="pb-3 font-medium">Due Status</th>
-                <th className="pb-3 font-medium">Description</th>
-                <th className="pb-3 font-medium">Amount</th>
-                <th className="pb-3 font-medium">Status</th>
+                <th className="pb-3 font-medium">Category</th>
+                <th className="pb-3 font-medium">Items</th>
+                <th className="pb-3 font-medium">Daily Cost</th>
+                <th className="pb-3 font-medium">Monthly Est.</th>
               </tr>
             </thead>
             <tbody>
-              {financialData.paymentMilestones.map((milestone, index) => (
-                <tr key={milestone.id} className="border-b border-[#323449]/50 last:border-0">
-                  <td className="py-3 text-sm text-soft-white/70">{String(index + 1).padStart(2, '0')}</td>
-                  <td className="py-3 text-sm text-soft-white/70">{milestone.time}</td>
-                  <td className="py-3 text-sm text-soft-white">{milestone.name}</td>
-                  <td className="py-3 text-sm text-soft-white/70">-</td>
-                  <td className="py-3 text-sm text-soft-white/70">-</td>
-                  <td className="py-3">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        milestone.status === 'Received'
-                          ? 'bg-[#15352C]/80 text-[#63FFC9] border border-[#315b48]'
-                          : milestone.status === 'Submitted'
-                          ? 'bg-[#3c3514]/70 text-[#FFE48C] border border-[#6b591f]'
-                          : 'bg-[#3a1c1c]/70 text-[#FF9BB0] border border-[#7b3b3b]'
-                      }`}
-                    >
-                      {milestone.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Variation Orders */}
-        <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
-          <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Variation Orders</h3>
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-[#323449] text-left text-xs uppercase tracking-wider text-soft-white/50">
-                <th className="pb-3 font-medium">#</th>
-                <th className="pb-3 font-medium">Code</th>
-                <th className="pb-3 font-medium">Document</th>
-                <th className="pb-3 font-medium">Value</th>
-                <th className="pb-3 font-medium">Status</th>
+              <tr className="border-b border-[#323449]/50">
+                <td className="py-3 text-sm text-soft-white">Employees</td>
+                <td className="py-3 text-sm text-soft-white/70">{employees.length}</td>
+                <td className="py-3 text-sm text-accent">{formatCurrency(totalEmployeeDailyCost)}</td>
+                <td className="py-3 text-sm text-soft-white/70">{formatCurrency(totalEmployeeDailyCost * 30)}</td>
               </tr>
-            </thead>
-            <tbody>
-              {financialData.variationOrders.map((vo, index) => (
-                <tr key={vo.code} className="border-b border-[#323449]/50 last:border-0">
-                  <td className="py-3 text-sm text-soft-white/70">{String(index + 1).padStart(2, '0')}</td>
-                  <td className="py-3 text-sm text-soft-white">{vo.code}</td>
-                  <td className="py-3">
-                    <svg className="h-5 w-5 text-soft-white/50" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
-                      <path d="M4 4h8l4 4v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                    </svg>
-                  </td>
-                  <td className={`py-3 text-sm ${vo.value >= 0 ? 'text-[#63FFC9]' : 'text-[#FF9BB0]'}`}>
-                    {vo.value >= 0 ? '+' : ''}{formatCurrency(vo.value)}
-                  </td>
-                  <td className="py-3">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        vo.status === 'Approved'
-                          ? 'bg-[#15352C]/80 text-[#63FFC9] border border-[#315b48]'
-                          : vo.status === 'Rejected'
-                          ? 'bg-[#3a1c1c]/70 text-[#FF9BB0] border border-[#7b3b3b]'
-                          : 'bg-[#3c3514]/70 text-[#FFE48C] border border-[#6b591f]'
-                      }`}
-                    >
-                      {vo.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              <tr className="border-b border-[#323449]/50">
+                <td className="py-3 text-sm text-soft-white">Equipment</td>
+                <td className="py-3 text-sm text-soft-white/70">{equipment.length}</td>
+                <td className="py-3 text-sm text-accent">{formatCurrency(totalEquipmentDailyCost)}</td>
+                <td className="py-3 text-sm text-soft-white/70">{formatCurrency(totalEquipmentDailyCost * 30)}</td>
+              </tr>
+              <tr className="border-b border-[#323449]/50 last:border-0">
+                <td className="py-3 text-sm text-soft-white">Materials (Total)</td>
+                <td className="py-3 text-sm text-soft-white/70">{materials.length}</td>
+                <td className="py-3 text-sm text-soft-white/50">-</td>
+                <td className="py-3 text-sm text-accent">{formatCurrency(totalMaterialsValue)}</td>
+              </tr>
             </tbody>
+            <tfoot>
+              <tr className="border-t border-[#323449]">
+                <td className="py-3 text-sm font-semibold text-soft-white">Total</td>
+                <td className="py-3 text-sm text-soft-white/70">{employees.length + equipment.length + materials.length}</td>
+                <td className="py-3 text-sm text-accent font-semibold">{formatCurrency(totalEmployeeDailyCost + totalEquipmentDailyCost)}</td>
+                <td className="py-3 text-sm text-accent font-semibold">{formatCurrency(estimatedTotalCost)}</td>
+              </tr>
+            </tfoot>
           </table>
-        </div>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Cost Performance Chart */}
-        <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
-          <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Cost Performance</h3>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-[#A9DFD8]" />
-              <span className="text-xs text-soft-white/60">PV</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-2 w-2 rounded-full bg-[#FF9BB0]" />
-              <span className="text-xs text-soft-white/60">AC</span>
-            </div>
-          </div>
-          <div className="h-48 flex items-end justify-between gap-1 border-b border-l border-[#323449] relative">
-            {/* Y-axis labels */}
-            <div className="absolute left-[-30px] top-0 bottom-0 flex flex-col justify-between text-xs text-soft-white/40">
-              <span>5k</span>
-              <span>4k</span>
-              <span>3k</span>
-              <span>2k</span>
-              <span>1k</span>
-            </div>
-            {/* Bars placeholder */}
-            {Array.from({ length: 12 }).map((_, i) => (
-              <div key={i} className="flex-1 flex flex-col justify-end gap-1">
-                <div className="bg-[#A9DFD8]/50 rounded-t" style={{ height: `${Math.random() * 80 + 20}%` }} />
-              </div>
-            ))}
-          </div>
-          <div className="flex justify-between mt-2 text-xs text-soft-white/40">
-            {['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map((month) => (
-              <span key={month}>{month}</span>
-            ))}
-          </div>
         </div>
 
         {/* Cost Breakdown */}
         <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
           <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Cost Breakdown</h3>
-          <div className="flex items-center gap-6">
-            {/* Donut Chart Placeholder */}
-            <div className="relative h-40 w-40 shrink-0">
-              <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
-                {financialData.costBreakdown.reduce((acc, item, index) => {
-                  const offset = acc.offset
-                  const circumference = 2 * Math.PI * 35
-                  const strokeDasharray = (item.percent / 100) * circumference
-                  acc.elements.push(
-                    <circle
-                      key={item.label}
-                      cx="50"
-                      cy="50"
-                      r="35"
-                      fill="none"
-                      stroke={item.color}
-                      strokeWidth="15"
-                      strokeDasharray={`${strokeDasharray} ${circumference}`}
-                      strokeDashoffset={-offset}
-                    />
+          {costBreakdown.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-soft-white/60">No cost data available</p>
+            </div>
+          ) : (
+            <div className="flex items-center gap-6">
+              {/* Donut Chart */}
+              <div className="relative h-40 w-40 shrink-0">
+                <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
+                  {costBreakdown.reduce((acc, item, index) => {
+                    const offset = acc.offset
+                    const circumference = 2 * Math.PI * 35
+                    const percent = totalBreakdown > 0 ? (item.value / totalBreakdown) * 100 : 0
+                    const strokeDasharray = (percent / 100) * circumference
+                    acc.elements.push(
+                      <circle
+                        key={item.label}
+                        cx="50"
+                        cy="50"
+                        r="35"
+                        fill="none"
+                        stroke={item.color}
+                        strokeWidth="15"
+                        strokeDasharray={`${strokeDasharray} ${circumference}`}
+                        strokeDashoffset={-offset}
+                      />
+                    )
+                    acc.offset += strokeDasharray
+                    return acc
+                  }, { elements: [] as React.ReactElement[], offset: 0 }).elements}
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="font-display text-sm font-semibold text-soft-white">{formatCurrency(totalBreakdown)}</span>
+                </div>
+              </div>
+              {/* Legend */}
+              <div className="space-y-3">
+                {costBreakdown.map((item) => {
+                  const percent = totalBreakdown > 0 ? Math.round((item.value / totalBreakdown) * 100) : 0
+                  return (
+                    <div key={item.label} className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
+                      <span className="text-sm text-soft-white/60">{percent}%</span>
+                      <span className="text-sm text-soft-white">{item.label}</span>
+                      <span className="text-xs text-soft-white/50 ml-auto">{formatCurrency(item.value)}</span>
+                    </div>
                   )
-                  acc.offset += strokeDasharray
-                  return acc
-                }, { elements: [] as JSX.Element[], offset: 0 }).elements}
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-display text-sm font-semibold text-soft-white">$1.8M</span>
+                })}
               </div>
             </div>
-            {/* Legend */}
-            <div className="space-y-3">
-              {financialData.costBreakdown.map((item) => (
-                <div key={item.label} className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full" style={{ backgroundColor: item.color }} />
-                  <span className="text-sm text-soft-white/60">{item.percent}%</span>
-                  <span className="text-sm text-soft-white">{item.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </div>
+
+      {/* Materials Detail */}
+      {materials.length > 0 && (
+        <div className="rounded-[18px] border border-[#2F303A] bg-surface p-6">
+          <h3 className="font-display text-lg font-semibold text-soft-white mb-4">Materials Cost Detail</h3>
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-[#323449] text-left text-xs uppercase tracking-wider text-soft-white/50">
+                <th className="pb-3 font-medium">#</th>
+                <th className="pb-3 font-medium">Material Code</th>
+                <th className="pb-3 font-medium">Name</th>
+                <th className="pb-3 font-medium">Quantity</th>
+                <th className="pb-3 font-medium">Unit</th>
+                <th className="pb-3 font-medium">Estimated Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              {materials.map((mat, index) => (
+                <tr key={mat.id} className="border-b border-[#323449]/50 last:border-0">
+                  <td className="py-3 text-sm text-soft-white/70">{String(index + 1).padStart(2, '0')}</td>
+                  <td className="py-3 text-sm text-soft-white">{mat.materialCode}</td>
+                  <td className="py-3 text-sm text-soft-white">{mat.materialName}</td>
+                  <td className="py-3 text-sm text-soft-white/70">{mat.requiredQuantity}</td>
+                  <td className="py-3 text-sm text-soft-white/70">{mat.unit}</td>
+                  <td className="py-3 text-sm text-accent">{mat.estimatedValue ? formatCurrency(mat.estimatedValue) : '-'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   )
 }

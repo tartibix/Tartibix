@@ -1,0 +1,18 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1600" fill="#ffffff"/>
+  <rect width="1200" height="100" fill="#1a1a2e"/>
+  <text x="600" y="60" font-family="Arial" font-size="32" fill="#ffffff" text-anchor="middle">QUALITY CONTROL TEST RESULTS</text>
+  <text x="100" y="180" font-family="Arial" font-size="24" fill="#000000">Material: Ready-Mix Concrete C40</text>
+  <text x="100" y="240" font-family="Arial" font-size="20" fill="#666666">Material Code: CON-001</text>
+  <text x="100" y="280" font-family="Arial" font-size="20" fill="#666666">Date: May 15, 2024</text>
+  <text x="100" y="320" font-family="Arial" font-size="20" fill="#666666">Batch Numbers: BC-2024-1156 to BC-2024-1163</text>
+  
+  <text x="100" y="420" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Test Results:</text>
+  <text x="100" y="470" font-family="Arial" font-size="18" fill="#000000">Slump Test: 95mm (Target: 75-100mm) ✓</text>
+  <text x="100" y="510" font-family="Arial" font-size="18" fill="#000000">Compressive Strength (7-day): 32 MPa ✓</text>
+  <text x="100" y="550" font-family="Arial" font-size="18" fill="#000000">Target 28-day Strength: 40 MPa</text>
+  <text x="100" y="590" font-family="Arial" font-size="18" fill="#000000">Temperature at pour: 28°C</text>
+  
+  <rect x="100" y="1400" width="1000" height="2" fill="#cccccc"/>
+  <text x="600" y="1500" font-family="Arial" font-size="18" fill="#4ade80" text-anchor="middle">STATUS: READY FOR REVIEW</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#0a1929"/>
+  <text x="960" y="400" font-family="Arial" font-size="48" fill="#a9dfd8" text-anchor="middle">Breakwater Construction</text>
+  <text x="960" y="480" font-family="Arial" font-size="36" fill="#ffffff" text-anchor="middle">Armor Unit Placement - Section A</text>
+  <text x="960" y="560" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Material: MAR-003 (Marine Concrete Blocks)</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Equipment: BC-001 (Barge Crane)</text>
+  <text x="960" y="680" font-family="Arial" font-size="24" fill="#4ade80" text-anchor="middle">Units placed today: 250 | Completion: 80%</text>
+</svg>

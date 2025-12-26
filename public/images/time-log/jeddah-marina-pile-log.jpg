@@ -1,0 +1,28 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1600" fill="#ffffff"/>
+  <rect width="1200" height="100" fill="#0a1929"/>
+  <text x="600" y="60" font-family="Arial" font-size="32" fill="#ffffff" text-anchor="middle">PILE INSTALLATION LOG</text>
+  <text x="100" y="180" font-family="Arial" font-size="24" fill="#000000">Task: M-005 Yacht Club Facilities</text>
+  <text x="100" y="240" font-family="Arial" font-size="20" fill="#666666">Project: PRJ-SAMPLE-002</text>
+  <text x="100" y="280" font-family="Arial" font-size="20" fill="#666666">Date: December 10, 2024</text>
+  <text x="100" y="320" font-family="Arial" font-size="20" fill="#666666">Supervisor: CE-03</text>
+  
+  <text x="100" y="420" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Daily Progress:</text>
+  <text x="100" y="470" font-family="Arial" font-size="18" fill="#000000">Piles driven today: 50</text>
+  <text x="100" y="510" font-family="Arial" font-size="18" fill="#000000">Cumulative piles: 275 / 500</text>
+  <text x="100" y="550" font-family="Arial" font-size="18" fill="#000000">Task completion: 55%</text>
+  <text x="100" y="590" font-family="Arial" font-size="18" fill="#000000">Equipment used: BC-001 (Barge Crane)</text>
+  
+  <text x="100" y="690" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Quality Verification:</text>
+  <text x="100" y="740" font-family="Arial" font-size="18" fill="#4ade80">✓ All piles to design depth</text>
+  <text x="100" y="780" font-family="Arial" font-size="18" fill="#4ade80">✓ Verticality within ±1% tolerance</text>
+  <text x="100" y="820" font-family="Arial" font-size="18" fill="#4ade80">✓ No damage during driving</text>
+  <text x="100" y="860" font-family="Arial" font-size="18" fill="#4ade80">✓ Position coordinates recorded</text>
+  
+  <text x="100" y="960" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Next Steps:</text>
+  <text x="100" y="1010" font-family="Arial" font-size="18" fill="#000000">• Pile integrity testing (PIT) scheduled</text>
+  <text x="100" y="1050" font-family="Arial" font-size="18" fill="#000000">• Load testing on selected piles</text>
+  
+  <rect x="100" y="1400" width="1000" height="2" fill="#cccccc"/>
+  <text x="600" y="1500" font-family="Arial" font-size="18" fill="#fbbf24" text-anchor="middle">STATUS: READY FOR REVIEW</text>
+</svg>

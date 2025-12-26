@@ -1,0 +1,25 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1600" fill="#ffffff"/>
+  <rect width="1200" height="100" fill="#1a1a2e"/>
+  <text x="600" y="60" font-family="Arial" font-size="32" fill="#ffffff" text-anchor="middle">MATERIAL DELIVERY NOTE</text>
+  <text x="100" y="180" font-family="Arial" font-size="24" fill="#000000">Delivery Note: DN-2024-456</text>
+  <text x="100" y="240" font-family="Arial" font-size="20" fill="#666666">Project: PRJ-SAMPLE-001 - Al-Riyadh Tower</text>
+  <text x="100" y="280" font-family="Arial" font-size="20" fill="#666666">Date: December 18, 2024</text>
+  <text x="100" y="320" font-family="Arial" font-size="20" fill="#666666">Received by: QS-01 (Quantity Surveyor)</text>
+  
+  <text x="100" y="420" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Material Details:</text>
+  <text x="100" y="470" font-family="Arial" font-size="18" fill="#000000">Material Code: STL-001</text>
+  <text x="100" y="510" font-family="Arial" font-size="18" fill="#000000">Description: Reinforcement Steel Grade 60</text>
+  <text x="100" y="550" font-family="Arial" font-size="18" fill="#000000">Quantity Ordered: 150 tons</text>
+  <text x="100" y="590" font-family="Arial" font-size="18" fill="#000000">Quantity Received: 150 tons ✓</text>
+  <text x="100" y="630" font-family="Arial" font-size="18" fill="#000000">Storage Location: Area B</text>
+  
+  <text x="100" y="730" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Quality Verification:</text>
+  <text x="100" y="780" font-family="Arial" font-size="18" fill="#4ade80">✓ Material certificates verified</text>
+  <text x="100" y="820" font-family="Arial" font-size="18" fill="#4ade80">✓ Visual inspection passed</text>
+  <text x="100" y="860" font-family="Arial" font-size="18" fill="#4ade80">✓ Grade markings confirmed</text>
+  <text x="100" y="900" font-family="Arial" font-size="18" fill="#4ade80">✓ No damage during transport</text>
+  
+  <rect x="100" y="1400" width="1000" height="2" fill="#cccccc"/>
+  <text x="600" y="1500" font-family="Arial" font-size="18" fill="#4ade80" text-anchor="middle">DELIVERY ACCEPTED - APPROVED FOR USE</text>
+</svg>

@@ -1,0 +1,8 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#1a2942"/>
+  <text x="960" y="400" font-family="Arial" font-size="48" fill="#a9dfd8" text-anchor="middle">Steel Pile Driving</text>
+  <text x="960" y="480" font-family="Arial" font-size="36" fill="#ffffff" text-anchor="middle">All piles within tolerance</text>
+  <text x="960" y="560" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Supervisor: CE-03 (Civil Engineer)</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Pile integrity testing: Next week</text>
+  <text x="960" y="680" font-family="Arial" font-size="24" fill="#fbbf24" text-anchor="middle">Status: Ready for Review</text>
+</svg>

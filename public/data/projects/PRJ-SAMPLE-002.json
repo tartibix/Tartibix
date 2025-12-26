@@ -1,0 +1,265 @@
+{
+  "projectId": "PRJ-SAMPLE-002",
+  "projectName": "Jeddah Marina Development",
+  "ownerName": "Red Sea Development Company",
+  "consultantName": "Eng. Sara Al-Zahrani",
+  "contractNumber": "CNT-2024-1245",
+  "contractValue": 8500000,
+  "contractStartDate": "2024-03-01",
+  "contractEndDate": "2025-02-28",
+  "projectLocation": "https://maps.google.com/?q=21.5433,39.1728",
+  "description": "Development of a luxury marina complex featuring 150 boat berths, a yacht club, waterfront restaurants, and retail spaces. The project includes marine infrastructure, landscaping, and all MEP services.",
+  "initiative": "mobile-refresh",
+  "template": "product-launch",
+  "createdAt": "2024-02-20T10:00:00.000Z",
+  "updatedAt": "2024-12-05T16:45:00.000Z",
+  "employees": [
+    {
+      "id": "emp-101",
+      "employeeCode": "PM-02",
+      "jobTitle": "Project Manager",
+      "rank": "Manager",
+      "dailyCost": 2200
+    },
+    {
+      "id": "emp-102",
+      "employeeCode": "ME-02",
+      "jobTitle": "Marine Engineer",
+      "rank": "Senior Engineer",
+      "dailyCost": 2000
+    },
+    {
+      "id": "emp-103",
+      "employeeCode": "CE-03",
+      "jobTitle": "Civil Engineer",
+      "rank": "Engineer",
+      "dailyCost": 1300
+    },
+    {
+      "id": "emp-104",
+      "employeeCode": "AR-01",
+      "jobTitle": "Landscape Architect",
+      "rank": "Senior Architect",
+      "dailyCost": 1700
+    },
+    {
+      "id": "emp-105",
+      "employeeCode": "QS-02",
+      "jobTitle": "Quantity Surveyor",
+      "rank": "Surveyor",
+      "dailyCost": 1200
+    }
+  ],
+  "equipment": [
+    {
+      "id": "equip-101",
+      "equipmentCode": "BC-001",
+      "equipmentName": "Barge Crane",
+      "responsiblePosition": "Marine Operator",
+      "responsibleEmployee": "Youssef Mahmoud",
+      "dailyCost": 8000
+    },
+    {
+      "id": "equip-102",
+      "equipmentCode": "DP-001",
+      "equipmentName": "Dredging Pump",
+      "responsiblePosition": "Pump Operator",
+      "responsibleEmployee": "Ibrahim Saleh",
+      "dailyCost": 4500
+    },
+    {
+      "id": "equip-103",
+      "equipmentCode": "TB-001",
+      "equipmentName": "Tugboat",
+      "responsiblePosition": "Captain",
+      "responsibleEmployee": "Captain Ahmed",
+      "dailyCost": 3500
+    }
+  ],
+  "materials": [
+    {
+      "id": "mat-101",
+      "materialCode": "MAR-001",
+      "materialName": "Marine Grade Steel Piles",
+      "description": "Corrosion resistant steel piles for marine structures",
+      "requiredQuantity": 500,
+      "unit": "tons",
+      "estimatedValue": 1500000
+    },
+    {
+      "id": "mat-102",
+      "materialCode": "MAR-002",
+      "materialName": "Floating Pontoons",
+      "description": "HDPE floating dock pontoons",
+      "requiredQuantity": 200,
+      "unit": "units",
+      "estimatedValue": 800000
+    },
+    {
+      "id": "mat-103",
+      "materialCode": "MAR-003",
+      "materialName": "Marine Concrete Blocks",
+      "description": "Breakwater armor units",
+      "requiredQuantity": 1500,
+      "unit": "pieces",
+      "estimatedValue": 450000
+    }
+  ],
+  "services": [
+    {
+      "id": "srv-101",
+      "serviceCode": "SRV-101",
+      "serviceName": "Marine Survey",
+      "description": "Bathymetric survey and seabed analysis",
+      "unit": "Lump Sum"
+    },
+    {
+      "id": "srv-102",
+      "serviceCode": "SRV-102",
+      "serviceName": "Environmental Impact Assessment",
+      "description": "Marine environmental study and mitigation plans",
+      "unit": "Lump Sum"
+    }
+  ],
+  "executionPlan": [
+    {
+      "id": "task-101",
+      "taskId": "M-001",
+      "taskName": "Marine Survey & Site Preparation",
+      "startDate": "2024-03-01",
+      "endDate": "2024-04-15",
+      "employeeCode": "ME-02",
+      "employeeCount": 8,
+      "notes": "Detailed bathymetric survey and marine site prep"
+    },
+    {
+      "id": "task-102",
+      "taskId": "M-002",
+      "taskName": "Breakwater Construction",
+      "startDate": "2024-04-16",
+      "endDate": "2024-07-31",
+      "parentId": "M-001",
+      "dependencies": "M-001",
+      "employeeCode": "CE-03",
+      "employeeCount": 25,
+      "equipmentCode": "BC-001",
+      "equipmentCount": 1,
+      "materialCode": "MAR-003",
+      "materialQuantity": 1500
+    },
+    {
+      "id": "task-103",
+      "taskId": "M-003",
+      "taskName": "Dredging & Channel Formation",
+      "startDate": "2024-05-01",
+      "endDate": "2024-08-31",
+      "dependencies": "M-001",
+      "employeeCode": "ME-02",
+      "employeeCount": 15,
+      "equipmentCode": "DP-001",
+      "equipmentCount": 2
+    },
+    {
+      "id": "task-104",
+      "taskId": "M-004",
+      "taskName": "Floating Dock Installation",
+      "startDate": "2024-09-01",
+      "endDate": "2024-12-15",
+      "dependencies": "M-002,M-003",
+      "employeeCode": "ME-02",
+      "employeeCount": 20,
+      "materialCode": "MAR-002",
+      "materialQuantity": 200
+    },
+    {
+      "id": "task-105",
+      "taskId": "M-005",
+      "taskName": "Yacht Club & Facilities Construction",
+      "startDate": "2024-08-01",
+      "endDate": "2025-01-31",
+      "employeeCode": "CE-03",
+      "employeeCount": 30,
+      "materialCode": "MAR-001",
+      "materialQuantity": 500
+    },
+    {
+      "id": "task-106",
+      "taskId": "M-006",
+      "taskName": "Landscaping & Final Touches",
+      "startDate": "2025-01-15",
+      "endDate": "2025-02-28",
+      "dependencies": "M-004,M-005",
+      "employeeCode": "AR-01",
+      "employeeCount": 15
+    }
+  ],
+  "supportingDocuments": [
+    {
+      "id": "doc-101",
+      "fileName": "Marina_Main_Contract.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 2800000,
+      "uploadDate": "2024-02-25T11:00:00.000Z",
+      "description": "Main contract with Red Sea Development Company",
+      "category": "contractual"
+    },
+    {
+      "id": "doc-102",
+      "fileName": "EIA_Approval.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 3800000,
+      "uploadDate": "2024-02-28T14:00:00.000Z",
+      "description": "Environmental Impact Assessment approval",
+      "category": "contractual"
+    },
+    {
+      "id": "doc-103",
+      "fileName": "Weekly_Progress_W48.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 1200000,
+      "uploadDate": "2024-12-01T09:00:00.000Z",
+      "description": "Weekly progress report Week 48",
+      "category": "execution"
+    },
+    {
+      "id": "doc-104",
+      "fileName": "Marina_Design_Drawings.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 18500000,
+      "uploadDate": "2024-03-10T10:00:00.000Z",
+      "description": "Complete marina design drawings",
+      "category": "design"
+    },
+    {
+      "id": "doc-105",
+      "fileName": "Marine_Survey_Report.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 5200000,
+      "uploadDate": "2024-02-25T11:00:00.000Z",
+      "description": "Complete marine and bathymetric survey",
+      "category": "design"
+    },
+    {
+      "id": "doc-106",
+      "fileName": "Budget_Forecast_Q4.xlsx",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 245000,
+      "uploadDate": "2024-10-01T14:00:00.000Z",
+      "description": "Q4 2024 budget forecast and cash flow",
+      "category": "financial"
+    },
+    {
+      "id": "doc-107",
+      "fileName": "Construction_Schedule_v3.mpp",
+      "fileType": "application/vnd.ms-project",
+      "fileSize": 1800000,
+      "uploadDate": "2024-09-15T08:00:00.000Z",
+      "description": "Updated construction schedule version 3",
+      "category": "planning"
+    }
+  ],
+  "status": "in-progress",
+  "currentStep": 4,
+  "progress": 62,
+  "health": "on-track"
+}

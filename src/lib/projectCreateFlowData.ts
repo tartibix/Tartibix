@@ -19,6 +19,9 @@ export type CreateDocumentItem = {
   required: boolean
   completed?: boolean
   locked?: boolean
+  hasWizard?: boolean
+  hasFileUpload?: boolean
+  wizardSteps?: string[]
   uploads?: DocumentUploadRow[]
 }
 
@@ -45,6 +48,7 @@ const initiativeOptions: CreateDropdownOption[] = [
   { value: 'mobile-refresh', label: 'Mobile App Refresh', description: 'Redesign navigation and onboarding flows' },
   { value: 'intranet-upgrade', label: 'Intranet Upgrade', description: 'Upgrade legacy knowledge base to new stack' },
   { value: 'crm-implementation', label: 'CRM Implementation', description: 'Roll out HubSpot automation to GTM teams' },
+  { value: 'other', label: 'Other', description: 'Custom initiative type' },
 ]
 
 const templateOptions: CreateDropdownOption[] = [
@@ -52,6 +56,7 @@ const templateOptions: CreateDropdownOption[] = [
   { value: 'product-launch', label: 'Product Launch' },
   { value: 'process-optimization', label: 'Process Optimization' },
   { value: 'governance-pack', label: 'Governance Pack' },
+  { value: 'other', label: 'Other' },
 ]
 
 const documentItems: CreateDocumentItem[] = [
@@ -60,38 +65,28 @@ const documentItems: CreateDocumentItem[] = [
     name: 'Contractual & Legal',
     icon: 'archive',
     required: true,
-    completed: true,
-    locked: true,
-    uploads: [
-      { order: 1, name: 'Master Service Agreement', type: 'PDF' },
-      { order: 2, name: 'Statement of Work v2', type: 'DOCX' },
-      { order: 3, name: 'Non-Disclosure Agreement', type: 'PDF' },
-      { order: 4, name: 'Security Compliance Checklist', type: 'XLSX' },
-    ],
+    completed: false,
+    locked: false,
+    uploads: [],
   },
   {
     id: 'project-setup-files',
     name: 'Project Setup Files',
     icon: 'edit',
     required: true,
-    uploads: [
-      { order: 1, name: 'Discovery Notes', type: 'DOCS' },
-      { order: 2, name: 'Sprint 0 Plan', type: 'Notion' },
-      { order: 3, name: 'Stakeholder Matrix', type: 'Sheet' },
-      { order: 4, name: 'Kickoff Deck', type: 'Slides' },
-    ],
+    completed: false,
+    hasWizard: true,
+    wizardSteps: ['employees', 'equipment', 'materials', 'services', 'execution-plan'],
+    uploads: [],
   },
   {
     id: 'supporting-documents',
     name: 'Supporting Documents',
     icon: 'note',
     required: false,
-    uploads: [
-      { order: 1, name: 'Research Insights', type: 'PDF' },
-      { order: 2, name: 'Accessibility Checklist', type: 'Sheet' },
-      { order: 3, name: 'QA Readiness Form', type: 'DOCX' },
-      { order: 4, name: 'Training Plan', type: 'PPT' },
-    ],
+    completed: false,
+    hasFileUpload: true,
+    uploads: [],
   },
 ]
 

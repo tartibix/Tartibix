@@ -1,0 +1,23 @@
+<svg width="1200" height="1600" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1600" fill="#ffffff"/>
+  <rect width="1200" height="100" fill="#1a1a2e"/>
+  <text x="600" y="60" font-family="Arial" font-size="32" fill="#ffffff" text-anchor="middle">SITE INSPECTION REPORT</text>
+  <text x="100" y="180" font-family="Arial" font-size="24" fill="#000000">Task: T-002 Foundation Excavation</text>
+  <text x="100" y="240" font-family="Arial" font-size="20" fill="#666666">Project: PRJ-SAMPLE-001</text>
+  <text x="100" y="280" font-family="Arial" font-size="20" fill="#666666">Date: March 28, 2024</text>
+  <text x="100" y="320" font-family="Arial" font-size="20" fill="#666666">Inspector: CE-01 (Senior Civil Engineer)</text>
+  
+  <text x="100" y="420" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Inspection Results:</text>
+  <text x="100" y="470" font-family="Arial" font-size="18" fill="#000000">✓ Excavation depth: -12.5m (As per design)</text>
+  <text x="100" y="510" font-family="Arial" font-size="18" fill="#000000">✓ Soil bearing capacity tests: PASSED</text>
+  <text x="100" y="550" font-family="Arial" font-size="18" fill="#000000">✓ Dewatering system: Operational</text>
+  <text x="100" y="590" font-family="Arial" font-size="18" fill="#000000">✓ Side slopes stability: Confirmed</text>
+  <text x="100" y="630" font-family="Arial" font-size="18" fill="#000000">✓ All safety measures in place</text>
+  
+  <text x="100" y="730" font-family="Arial" font-size="22" fill="#000000" font-weight="bold">Next Steps:</text>
+  <text x="100" y="780" font-family="Arial" font-size="18" fill="#000000">• Install waterproofing membrane (WTP-001)</text>
+  <text x="100" y="820" font-family="Arial" font-size="18" fill="#000000">• Commence Task T-003: Foundation Concrete Work</text>
+  
+  <rect x="100" y="1400" width="1000" height="2" fill="#cccccc"/>
+  <text x="600" y="1500" font-family="Arial" font-size="18" fill="#666666" text-anchor="middle">Status: APPROVED FOR NEXT PHASE</text>
+</svg>

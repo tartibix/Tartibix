@@ -1,0 +1,433 @@
+{
+  "projectId": "PRJ-SAMPLE-001",
+  "projectName": "Al-Riyadh Tower Construction",
+  "ownerName": "Saudi Investment Group",
+  "consultantName": "Eng. Mohammed Al-Rashid",
+  "contractNumber": "CNT-2024-0892",
+  "contractValue": 15000000,
+  "contractStartDate": "2024-01-15",
+  "contractEndDate": "2025-06-30",
+  "projectLocation": "https://maps.google.com/?q=24.7136,46.6753",
+  "description": "Construction of a 25-story commercial tower in the heart of Riyadh, featuring modern office spaces, retail areas on ground floor, and underground parking for 500 vehicles. The project includes sustainable building practices and LEED certification targets.",
+  "initiative": "website-redesign",
+  "template": "blank",
+  "createdAt": "2024-01-10T08:00:00.000Z",
+  "updatedAt": "2024-12-06T10:30:00.000Z",
+  "employees": [
+    {
+      "id": "emp-001",
+      "employeeCode": "PM-01",
+      "jobTitle": "Project Manager",
+      "rank": "Senior Manager",
+      "dailyCost": 2500
+    },
+    {
+      "id": "emp-002",
+      "employeeCode": "CE-01",
+      "jobTitle": "Civil Engineer",
+      "rank": "Senior Engineer",
+      "dailyCost": 1800
+    },
+    {
+      "id": "emp-003",
+      "employeeCode": "CE-02",
+      "jobTitle": "Civil Engineer",
+      "rank": "Engineer",
+      "dailyCost": 1200
+    },
+    {
+      "id": "emp-004",
+      "employeeCode": "EE-01",
+      "jobTitle": "Electrical Engineer",
+      "rank": "Senior Engineer",
+      "dailyCost": 1600
+    },
+    {
+      "id": "emp-005",
+      "employeeCode": "ME-01",
+      "jobTitle": "Mechanical Engineer",
+      "rank": "Engineer",
+      "dailyCost": 1400
+    },
+    {
+      "id": "emp-006",
+      "employeeCode": "QS-01",
+      "jobTitle": "Quantity Surveyor",
+      "rank": "Senior Surveyor",
+      "dailyCost": 1500
+    },
+    {
+      "id": "emp-007",
+      "employeeCode": "SF-01",
+      "jobTitle": "Safety Officer",
+      "rank": "Officer",
+      "dailyCost": 900
+    },
+    {
+      "id": "emp-008",
+      "employeeCode": "SC-01",
+      "jobTitle": "Site Coordinator",
+      "rank": "Coordinator",
+      "dailyCost": 800
+    }
+  ],
+  "equipment": [
+    {
+      "id": "equip-001",
+      "equipmentCode": "TC-001",
+      "equipmentName": "Tower Crane 60m",
+      "responsiblePosition": "Crane Operator",
+      "responsibleEmployee": "Ahmed Hassan",
+      "dailyCost": 5000
+    },
+    {
+      "id": "equip-002",
+      "equipmentCode": "EX-001",
+      "equipmentName": "Excavator CAT 320",
+      "responsiblePosition": "Heavy Equipment Operator",
+      "responsibleEmployee": "Khalid Omar",
+      "dailyCost": 2500
+    },
+    {
+      "id": "equip-003",
+      "equipmentCode": "CM-001",
+      "equipmentName": "Concrete Mixer Truck",
+      "responsiblePosition": "Driver",
+      "responsibleEmployee": "Saeed Ali",
+      "dailyCost": 1500
+    },
+    {
+      "id": "equip-004",
+      "equipmentCode": "CP-001",
+      "equipmentName": "Concrete Pump",
+      "responsiblePosition": "Pump Operator",
+      "responsibleEmployee": "Faisal Nasser",
+      "dailyCost": 3000
+    },
+    {
+      "id": "equip-005",
+      "equipmentCode": "SC-001",
+      "equipmentName": "Scaffolding System",
+      "responsiblePosition": "Site Supervisor",
+      "responsibleEmployee": "Mohammed Qasim",
+      "dailyCost": 800
+    }
+  ],
+  "materials": [
+    {
+      "id": "mat-001",
+      "materialCode": "CON-001",
+      "materialName": "Ready-Mix Concrete C40",
+      "description": "High strength concrete for structural elements",
+      "requiredQuantity": 15000,
+      "unit": "m³",
+      "estimatedValue": 2250000
+    },
+    {
+      "id": "mat-002",
+      "materialCode": "STL-001",
+      "materialName": "Reinforcement Steel Grade 60",
+      "description": "Deformed bars for reinforced concrete",
+      "requiredQuantity": 2500,
+      "unit": "tons",
+      "estimatedValue": 3750000
+    },
+    {
+      "id": "mat-003",
+      "materialCode": "CEM-001",
+      "materialName": "Portland Cement Type I",
+      "description": "General purpose cement for construction",
+      "requiredQuantity": 5000,
+      "unit": "bags",
+      "estimatedValue": 150000
+    },
+    {
+      "id": "mat-004",
+      "materialCode": "BRK-001",
+      "materialName": "Concrete Blocks",
+      "description": "Hollow concrete blocks 20x20x40",
+      "requiredQuantity": 50000,
+      "unit": "pieces",
+      "estimatedValue": 200000
+    },
+    {
+      "id": "mat-005",
+      "materialCode": "WTP-001",
+      "materialName": "Waterproofing Membrane",
+      "description": "Bituminous membrane for foundation waterproofing",
+      "requiredQuantity": 8000,
+      "unit": "m²",
+      "estimatedValue": 320000
+    }
+  ],
+  "services": [
+    {
+      "id": "srv-001",
+      "serviceCode": "SRV-001",
+      "serviceName": "Geotechnical Investigation",
+      "description": "Soil testing and foundation recommendations",
+      "unit": "Lump Sum"
+    },
+    {
+      "id": "srv-002",
+      "serviceCode": "SRV-002",
+      "serviceName": "MEP Design Consultation",
+      "description": "Mechanical, Electrical, and Plumbing system design",
+      "unit": "Monthly"
+    },
+    {
+      "id": "srv-003",
+      "serviceCode": "SRV-003",
+      "serviceName": "Quality Control Testing",
+      "description": "Material and construction quality testing services",
+      "unit": "Per Test"
+    },
+    {
+      "id": "srv-004",
+      "serviceCode": "SRV-004",
+      "serviceName": "Security Services",
+      "description": "24/7 site security and access control",
+      "unit": "Monthly"
+    }
+  ],
+  "executionPlan": [
+    {
+      "id": "task-001",
+      "taskId": "T-001",
+      "taskName": "Site Preparation",
+      "startDate": "2024-01-15",
+      "endDate": "2024-02-15",
+      "employeeCode": "PM-01",
+      "employeeCount": 15,
+      "equipmentCode": "EX-001",
+      "equipmentCount": 2,
+      "notes": "Clear site and establish temporary facilities"
+    },
+    {
+      "id": "task-002",
+      "taskId": "T-002",
+      "taskName": "Foundation Excavation",
+      "startDate": "2024-02-16",
+      "endDate": "2024-03-30",
+      "parentId": "T-001",
+      "dependencies": "T-001",
+      "employeeCode": "CE-01",
+      "employeeCount": 20,
+      "equipmentCode": "EX-001",
+      "equipmentCount": 3,
+      "materialCode": "WTP-001",
+      "materialQuantity": 8000,
+      "notes": "Deep excavation for basement levels"
+    },
+    {
+      "id": "task-003",
+      "taskId": "T-003",
+      "taskName": "Foundation Concrete Work",
+      "startDate": "2024-04-01",
+      "endDate": "2024-05-31",
+      "parentId": "T-002",
+      "dependencies": "T-002",
+      "employeeCode": "CE-01",
+      "employeeCount": 25,
+      "equipmentCode": "CP-001",
+      "equipmentCount": 2,
+      "materialCode": "CON-001",
+      "materialQuantity": 3000,
+      "notes": "Mat foundation and basement walls"
+    },
+    {
+      "id": "task-004",
+      "taskId": "T-004",
+      "taskName": "Structural Frame - Floors 1-10",
+      "startDate": "2024-06-01",
+      "endDate": "2024-09-30",
+      "parentId": "T-003",
+      "dependencies": "T-003",
+      "employeeCode": "CE-02",
+      "employeeCount": 30,
+      "equipmentCode": "TC-001",
+      "equipmentCount": 1,
+      "materialCode": "STL-001",
+      "materialQuantity": 1000,
+      "notes": "Reinforced concrete frame construction"
+    },
+    {
+      "id": "task-005",
+      "taskId": "T-005",
+      "taskName": "Structural Frame - Floors 11-25",
+      "startDate": "2024-10-01",
+      "endDate": "2025-02-28",
+      "parentId": "T-004",
+      "dependencies": "T-004",
+      "employeeCode": "CE-02",
+      "employeeCount": 35,
+      "equipmentCode": "TC-001",
+      "equipmentCount": 2,
+      "materialCode": "STL-001",
+      "materialQuantity": 1500,
+      "notes": "Upper floors structural work"
+    },
+    {
+      "id": "task-006",
+      "taskId": "T-006",
+      "taskName": "MEP Rough-In Installation",
+      "startDate": "2024-08-01",
+      "endDate": "2025-03-31",
+      "dependencies": "T-004",
+      "employeeCode": "EE-01",
+      "employeeCount": 20,
+      "notes": "Electrical, plumbing, and HVAC systems"
+    },
+    {
+      "id": "task-007",
+      "taskId": "T-007",
+      "taskName": "Facade Installation",
+      "startDate": "2025-01-01",
+      "endDate": "2025-05-15",
+      "dependencies": "T-005",
+      "employeeCode": "CE-01",
+      "employeeCount": 25,
+      "equipmentCode": "SC-001",
+      "equipmentCount": 50,
+      "notes": "Curtain wall and cladding installation"
+    },
+    {
+      "id": "task-008",
+      "taskId": "T-008",
+      "taskName": "Interior Finishing",
+      "startDate": "2025-03-01",
+      "endDate": "2025-06-15",
+      "dependencies": "T-006",
+      "employeeCode": "SC-01",
+      "employeeCount": 40,
+      "materialCode": "BRK-001",
+      "materialQuantity": 50000,
+      "notes": "Partitions, flooring, ceiling, and painting"
+    },
+    {
+      "id": "task-009",
+      "taskId": "T-009",
+      "taskName": "Final Inspections & Handover",
+      "startDate": "2025-06-15",
+      "endDate": "2025-06-30",
+      "dependencies": "T-007,T-008",
+      "employeeCode": "PM-01",
+      "employeeCount": 10,
+      "notes": "Final quality checks and client handover"
+    }
+  ],
+  "supportingDocuments": [
+    {
+      "id": "doc-001",
+      "fileName": "Main_Contract_Agreement.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 2450000,
+      "uploadDate": "2024-01-12T10:00:00.000Z",
+      "description": "Main construction contract with Saudi Investment Group",
+      "category": "contractual"
+    },
+    {
+      "id": "doc-002",
+      "fileName": "Subcontractor_Agreement_MEP.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 1800000,
+      "uploadDate": "2024-01-14T14:30:00.000Z",
+      "description": "MEP subcontractor agreement",
+      "category": "contractual"
+    },
+    {
+      "id": "doc-003",
+      "fileName": "Daily_Progress_Report_Dec.xlsx",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 45000,
+      "uploadDate": "2024-12-01T09:00:00.000Z",
+      "description": "Daily progress report for December 2024",
+      "category": "execution"
+    },
+    {
+      "id": "doc-004",
+      "fileName": "RFI_Log_2024.xlsx",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 38000,
+      "uploadDate": "2024-11-15T09:15:00.000Z",
+      "description": "Request for Information log for 2024",
+      "category": "execution"
+    },
+    {
+      "id": "doc-005",
+      "fileName": "Architectural_Plans_Rev3.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 15600000,
+      "uploadDate": "2024-01-14T14:30:00.000Z",
+      "description": "Approved architectural drawings revision 3",
+      "category": "design"
+    },
+    {
+      "id": "doc-006",
+      "fileName": "Structural_Calculations.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 8500000,
+      "uploadDate": "2024-02-01T10:00:00.000Z",
+      "description": "Structural engineering calculations and reports",
+      "category": "design"
+    },
+    {
+      "id": "doc-007",
+      "fileName": "MEP_Shop_Drawings.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 12000000,
+      "uploadDate": "2024-03-15T11:00:00.000Z",
+      "description": "MEP shop drawings for all floors",
+      "category": "design"
+    },
+    {
+      "id": "doc-008",
+      "fileName": "Variation_Order_001.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 450000,
+      "uploadDate": "2024-06-20T14:00:00.000Z",
+      "description": "Variation order for additional parking level",
+      "category": "financial"
+    },
+    {
+      "id": "doc-009",
+      "fileName": "Monthly_Invoice_Nov2024.pdf",
+      "fileType": "application/pdf",
+      "fileSize": 320000,
+      "uploadDate": "2024-11-30T16:00:00.000Z",
+      "description": "Monthly progress invoice for November 2024",
+      "category": "financial"
+    },
+    {
+      "id": "doc-010",
+      "fileName": "Master_Schedule_Rev5.mpp",
+      "fileType": "application/vnd.ms-project",
+      "fileSize": 2100000,
+      "uploadDate": "2024-10-01T08:00:00.000Z",
+      "description": "Updated master project schedule revision 5",
+      "category": "planning"
+    },
+    {
+      "id": "doc-011",
+      "fileName": "Risk_Register_Q4.xlsx",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 156000,
+      "uploadDate": "2024-10-15T09:00:00.000Z",
+      "description": "Project risk register for Q4 2024",
+      "category": "planning"
+    },
+    {
+      "id": "doc-012",
+      "fileName": "Quality_Checklist_Template.xlsx",
+      "fileType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "fileSize": 89000,
+      "uploadDate": "2024-01-20T10:00:00.000Z",
+      "description": "Quality inspection checklist template",
+      "category": "closeout"
+    }
+  ],
+  "status": "in-progress",
+  "currentStep": 5,
+  "progress": 45,
+  "health": "on-track"
+}

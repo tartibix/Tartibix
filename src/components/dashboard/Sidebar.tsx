@@ -119,7 +119,7 @@ function SidebarLink({ item, active, onClick }: { item: NavItem; active: boolean
 			className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-colors ${
 				active
 					? 'bg-accent text-night'
-					: 'text-soft-white/85 hover:bg-white/5 hover:text-soft-white'
+					: 'text-soft-white/85 hover:bg-accent/15 hover:text-soft-white'
 			}`}
 		>
 			<Icon className={active ? 'text-night' : 'text-soft-white/70'} />

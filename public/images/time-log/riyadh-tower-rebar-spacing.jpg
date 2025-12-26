@@ -1,0 +1,8 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#2a2a3e"/>
+  <text x="960" y="350" font-family="Arial" font-size="42" fill="#a9dfd8" text-anchor="middle">Rebar Spacing Measurements</text>
+  <text x="960" y="450" font-family="Arial" font-size="28" fill="#ffffff" text-anchor="middle">Grid E4-E5 Verification</text>
+  <text x="960" y="550" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Reference: Drawing Sheet S-05, Rev 3</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#ef4444" text-anchor="middle">Deviation: +20mm from specification</text>
+  <text x="960" y="680" font-family="Arial" font-size="20" fill="#888888" text-anchor="middle">Inspector: CE-02 | Date: August 22, 2024</text>
+</svg>

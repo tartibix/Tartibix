@@ -1,0 +1,7 @@
+<svg width="1920" height="1080" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1920" height="1080" fill="#2a2a3e"/>
+  <text x="960" y="400" font-family="Arial" font-size="48" fill="#a9dfd8" text-anchor="middle">Foundation Excavation Complete</text>
+  <text x="960" y="480" font-family="Arial" font-size="36" fill="#4ade80" text-anchor="middle">✓ Deep excavation for basement levels</text>
+  <text x="960" y="560" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Final depth achieved: -12.5m</text>
+  <text x="960" y="620" font-family="Arial" font-size="24" fill="#888888" text-anchor="middle">Ready for waterproofing membrane installation</text>
+</svg>
