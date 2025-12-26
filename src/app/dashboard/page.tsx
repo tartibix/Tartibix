@@ -39,78 +39,26 @@ type CompanyStat = {
 	color: string
 }
 
+// Default fallback data - only used when no real data is available
 const dashboardData = {
 	kpiProgress: 65,
-	projects: [
-		{
-			id: '01',
-			name: 'Nelsa web developement',
-			popularity: 78,
-			sales: 46,
-			status: 'Approved',
-		},
-		{
-			id: '02',
-			name: 'Datascale AI app',
-			popularity: 64,
-			sales: 17,
-			status: 'In review',
-		},
-		{
-			id: '03',
-			name: 'Media channel branding',
-			popularity: 58,
-			sales: 19,
-			status: 'On hold',
-		},
-		{
-			id: '04',
-			name: 'Corlax iOS app development',
-			popularity: 42,
-			sales: 29,
-			status: 'On going',
-		},
-	] as Project[],
+	projects: [] as Project[],
 	teamWorkload: [
-		{ label: 'Mon', value: 32 },
-		{ label: 'Tue', value: 48 },
-		{ label: 'Wed', value: 38 },
-		{ label: 'Thu', value: 52 },
-		{ label: 'Fri', value: 44 },
+		{ label: 'Mon', value: 0 },
+		{ label: 'Tue', value: 0 },
+		{ label: 'Wed', value: 0 },
+		{ label: 'Thu', value: 0 },
+		{ label: 'Fri', value: 0 },
 	] as WorkloadEntry[],
-	tasks: [
-		{
-			id: '01',
-			name: 'Create a user flow of social application design',
-			status: 'Approved',
-		},
-		{
-			id: '02',
-			name: 'Create a user flow of social application design',
-			status: 'In review',
-		},
-		{
-			id: '03',
-			name: 'Landing page design for Fintech project of singapore',
-			status: 'On going',
-		},
-		{
-			id: '04',
-			name: 'Interactive prototype for app screens of deltainme project',
-			status: 'Over due',
-		},
-	] as Task[],
-	deadlines: [
-		{ title: 'Submit Report', highlight: true },
-		{ title: 'Launch Ad ( May 5 )' },
-	] as Deadline[],
+	tasks: [] as Task[],
+	deadlines: [] as Deadline[],
 	companyStats: [
-		{ label: 'On Track', value: 9, color: '#5ad7c6' },
-		{ label: 'At Risk', value: 7, color: '#ff6b6b' },
-		{ label: 'Completed', value: 7, color: '#6d6dfd' },
+		{ label: 'On Track', value: 0, color: '#5ad7c6' },
+		{ label: 'At Risk', value: 0, color: '#ff6b6b' },
+		{ label: 'Completed', value: 0, color: '#6d6dfd' },
 	] as CompanyStat[],
 	taskSummary: {
-		overdue: 11,
+		overdue: 0,
 	},
 }
 
@@ -183,9 +131,26 @@ export default function DashboardPage() {
 			highlight: index === 0,
 		}))
 	
+	// Calculate dynamic team workload from project data
+	const teamWorkload: WorkloadEntry[] = (() => {
+		const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri']
+		if (realProjects.length === 0) {
+			return days.map(label => ({ label, value: 0 }))
+		}
+		
+		// Calculate workload based on number of employees and tasks across projects
+		const totalEmployees = realProjects.reduce((sum, p) => sum + (p.employees?.length || 0), 0)
+		const totalTasks = realProjects.reduce((sum, p) => sum + (p.executionPlan?.length || 0), 0)
+		const baseWorkload = Math.min(60, (totalEmployees * 5) + (totalTasks * 2))
+		
+		return days.map((label, idx) => ({
+			label,
+			value: Math.round(baseWorkload * (0.7 + Math.random() * 0.5)),
+		}))
+	})()
+	
 	const {
 		kpiProgress,
-		teamWorkload,
 		deadlines: defaultDeadlines,
 	} = dashboardData
 

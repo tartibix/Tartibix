@@ -276,19 +276,30 @@ export default function TasksPage() {
 								</div>
 							) : (
 								<ul className="mt-4 space-y-3">
-									{teamMembers.map((member, index) => (
-										<li key={member.name + index} className="flex items-center gap-3 rounded-[12px] border border-[rgba(47,48,58,0.78)] bg-[#1B1C24] px-3 py-3">
-											<div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(47,48,58,0.78)] bg-accent/20 flex items-center justify-center">
-												<span className="text-sm font-semibold text-accent">
-													{member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
-												</span>
-											</div>
-											<div className="flex-1">
-												<span className="text-[15px] font-medium text-soft-white">{member.name}</span>
-												<p className="text-xs text-muted-foreground/70">{member.taskCount} tasks assigned</p>
-											</div>
-										</li>
-									))}
+									{teamMembers.map((member, index) => {
+										const memberSlug = member.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+										return (
+											<li key={member.name + index}>
+												<Link 
+													href={`/dashboard/tasks/${memberSlug}`}
+													className="flex items-center gap-3 rounded-[12px] border border-[rgba(47,48,58,0.78)] bg-[#1B1C24] px-3 py-3 transition-colors hover:bg-[#25262F] hover:border-accent/30"
+												>
+													<div className="h-10 w-10 overflow-hidden rounded-full border border-[rgba(47,48,58,0.78)] bg-accent/20 flex items-center justify-center">
+														<span className="text-sm font-semibold text-accent">
+															{member.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+														</span>
+													</div>
+													<div className="flex-1">
+														<span className="text-[15px] font-medium text-soft-white">{member.name}</span>
+														<p className="text-xs text-muted-foreground/70">{member.taskCount} tasks assigned</p>
+													</div>
+													<svg className="h-4 w-4 text-soft-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+													</svg>
+												</Link>
+											</li>
+										)
+									})}
 								</ul>
 							)}
 						</section>

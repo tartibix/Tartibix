@@ -155,6 +155,51 @@ function ProjectsOverview({ onCreate }: { onCreate: () => void }) {
     return { total, avgProgress, onTrack, blocked, budgetUtilization }
   }, [filteredProjects])
 
+  // Generate dynamic governance reviews from real projects
+  const dynamicGovernanceReviews = useMemo<GovernanceReviewRow[]>(() => {
+    if (realProjects.length === 0) {
+      // Return default reviews if no projects
+      return governanceReviews
+    }
+    
+    return realProjects.slice(0, 5).map((project, idx) => {
+      // Determine status based on project health and progress
+      let status: GovernanceReviewRow['status'] = 'Scheduled'
+      if (project.health === 'blocked') status = 'Blocked'
+      else if (project.progress && project.progress >= 100) status = 'Complete'
+      else if (project.progress && project.progress >= 50) status = 'In Review'
+      
+      // Calculate review date based on project end date
+      const reviewDate = project.contractEndDate 
+        ? new Date(project.contractEndDate)
+        : new Date(Date.now() + (idx + 1) * 7 * 24 * 60 * 60 * 1000)
+      
+      // Determine quarter
+      const month = reviewDate.getMonth()
+      const quarter = month < 3 ? 'Q1' : month < 6 ? 'Q2' : month < 9 ? 'Q3' : 'Q4'
+      
+      // Determine focus based on initiative
+      const focusMap: Record<string, string> = {
+        'oil-gas': 'Platform',
+        'infrastructure': 'Platform',
+        'construction': 'Experience',
+        'technology': 'Mobile',
+        'automation': 'Automation',
+      }
+      const focus = focusMap[project.initiative || ''] || 'Experience'
+      
+      return {
+        id: idx + 1,
+        review: `${project.projectName} Review`,
+        lead: project.ownerName || 'Project Manager',
+        status,
+        date: reviewDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        focus,
+        quarter,
+      }
+    })
+  }, [realProjects])
+
   const activeProgramLabel = selectedProgram === 'all' 
     ? 'All Projects' 
     : initiativeOptions.find((option) => option.value === selectedProgram)?.label ?? 'Selected program'
@@ -170,7 +215,7 @@ function ProjectsOverview({ onCreate }: { onCreate: () => void }) {
           onCreate={onCreate} 
         />
         <GovernanceReviews
-          rows={governanceReviews}
+          rows={dynamicGovernanceReviews}
           focusOptions={focusOptions}
           quarterOptions={quarterOptions}
           selectedFocus={selectedFocus}

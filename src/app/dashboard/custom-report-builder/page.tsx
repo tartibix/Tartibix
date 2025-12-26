@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
+import { exportToPDF, exportToExcel, fetchReportData } from '@/lib/reportExporter'
 
 // Static report configuration data
 const dateRanges = [
@@ -84,7 +85,13 @@ export default function CustomReportBuilderPage() {
 							selectedValue={selectedDataType}
 							onSelect={setSelectedDataType}
 						/>
-						<DownloadSection disabled={!selectedProject || !selectedDataType} />
+						<DownloadSection 
+							disabled={!selectedProject || !selectedDataType} 
+							projectId={selectedProject}
+							projectName={projects.find(p => p.value === selectedProject)?.label || ''}
+							dateRange={dateRanges.find(d => d.value === selectedDateRange)?.label || ''}
+							dataType={selectedDataType}
+						/>
 					</div>
 				</section>
 			</div>
@@ -199,13 +206,64 @@ function SelectField({
 	)
 }
 
-function DownloadSection({ disabled = false }: { disabled?: boolean }) {
+function DownloadSection({ 
+	disabled = false,
+	projectId,
+	projectName,
+	dateRange,
+	dataType
+}: { 
+	disabled?: boolean
+	projectId: string
+	projectName: string
+	dateRange: string
+	dataType: string
+}) {
+	const [isExporting, setIsExporting] = useState(false)
+
+	const handlePDFDownload = async () => {
+		if (disabled || isExporting) return
+		setIsExporting(true)
+		try {
+			const reportData = await fetchReportData(projectId, projectName, dateRange, dataType)
+			await exportToPDF(reportData)
+		} catch (error) {
+			console.error('Error exporting PDF:', error)
+			alert('Failed to export PDF. Please try again.')
+		} finally {
+			setIsExporting(false)
+		}
+	}
+
+	const handleExcelDownload = async () => {
+		if (disabled || isExporting) return
+		setIsExporting(true)
+		try {
+			const reportData = await fetchReportData(projectId, projectName, dateRange, dataType)
+			await exportToExcel(reportData)
+		} catch (error) {
+			console.error('Error exporting Excel:', error)
+			alert('Failed to export Excel. Please try again.')
+		} finally {
+			setIsExporting(false)
+		}
+	}
+
 	return (
 		<div className="mt-6 flex flex-col gap-3 text-soft-white">
 			<span className="text-[20px] font-semibold leading-[1.2]">Download</span>
 			<div className="flex flex-wrap gap-4">
-				<DownloadButton accent label="Pdf" disabled={disabled} />
-				<DownloadButton label="Excel" disabled={disabled} />
+				<DownloadButton 
+					accent 
+					label={isExporting ? "Exporting..." : "Pdf"} 
+					disabled={disabled || isExporting} 
+					onClick={handlePDFDownload}
+				/>
+				<DownloadButton 
+					label={isExporting ? "Exporting..." : "Excel"} 
+					disabled={disabled || isExporting}
+					onClick={handleExcelDownload}
+				/>
 			</div>
 			{disabled && (
 				<p className="text-sm text-soft-white/50">Select a project and data type to enable downloads</p>
@@ -214,12 +272,23 @@ function DownloadSection({ disabled = false }: { disabled?: boolean }) {
 	)
 }
 
-function DownloadButton({ label, accent = false, disabled = false }: { label: string; accent?: boolean; disabled?: boolean }) {
+function DownloadButton({ 
+	label, 
+	accent = false, 
+	disabled = false,
+	onClick
+}: { 
+	label: string
+	accent?: boolean
+	disabled?: boolean
+	onClick?: () => void
+}) {
 	if (accent) {
 		return (
 			<button
 				type="button"
 				disabled={disabled}
+				onClick={onClick}
 				className={`h-[47px] min-w-[159px] rounded-[10px] bg-accent px-8 text-center font-display text-[20px] font-bold leading-[30px] text-[#2B2B36] shadow-[0_0_10px_rgba(169,223,216,0.25)] transition hover:shadow-[0_0_12px_rgba(169,223,216,0.4)] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 			>
 				{label}
@@ -231,6 +300,7 @@ function DownloadButton({ label, accent = false, disabled = false }: { label: st
 		<button
 			type="button"
 			disabled={disabled}
+			onClick={onClick}
 			className={`h-[47px] min-w-[159px] rounded-[10px] border border-[#323449] bg-[#10111B] px-8 text-center font-display text-[20px] font-medium leading-[30px] text-soft-white transition hover:border-accent/60 hover:bg-[#181A27] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 		>
 			{label}

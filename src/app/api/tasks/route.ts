@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getLocalProjects } from '@/lib/projectStorage'
+import { getLocalProjects, saveLocalProject } from '@/lib/projectStorage'
 import { ProjectSetupData, ExecutionPlanTask } from '@/lib/projectSetupTypes'
 
 export interface TaskWithProject extends ExecutionPlanTask {
@@ -98,11 +98,35 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { projectId, task } = body
-
-    if (!projectId || !task) {
+    
+    // Support both formats: { projectId, task } and direct task object
+    let projectId: string
+    let taskData: Partial<ExecutionPlanTask>
+    
+    if (body.task && body.projectId) {
+      // Legacy format: { projectId, task }
+      projectId = body.projectId
+      taskData = body.task
+    } else if (body.projectId) {
+      // Direct format from create form
+      projectId = body.projectId
+      taskData = {
+        taskName: body.taskName,
+        notes: body.description, // Map description to notes field
+        startDate: body.startDate,
+        endDate: body.endDate,
+        employeeCode: body.employeeCode,
+      }
+    } else {
       return NextResponse.json(
-        { error: 'Project ID and task data are required' },
+        { error: 'Project ID is required' },
+        { status: 400 }
+      )
+    }
+
+    if (!taskData.taskName) {
+      return NextResponse.json(
+        { error: 'Task name is required' },
         { status: 400 }
       )
     }
@@ -119,9 +143,13 @@ export async function POST(request: NextRequest) {
 
     // Generate task ID
     const newTask: ExecutionPlanTask = {
-      ...task,
+      id: `TASK-${Date.now()}`,
       taskId: `TASK-${Date.now()}`,
-      createdAt: new Date().toISOString(),
+      taskName: taskData.taskName || 'Untitled Task',
+      notes: taskData.notes,
+      startDate: taskData.startDate || new Date().toISOString().split('T')[0],
+      endDate: taskData.endDate || new Date().toISOString().split('T')[0],
+      employeeCode: taskData.employeeCode,
     }
 
     // Add task to project
@@ -130,10 +158,8 @@ export async function POST(request: NextRequest) {
     }
     projects[projectIndex].executionPlan!.push(newTask)
 
-    // Save updated projects (would save to database in production)
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tartibix_projects', JSON.stringify(projects))
-    }
+    // Save updated project
+    saveLocalProject(projects[projectIndex])
 
     return NextResponse.json(newTask, { status: 201 })
   } catch (error) {
@@ -186,10 +212,8 @@ export async function PUT(request: NextRequest) {
       updatedAt: new Date().toISOString(),
     }
 
-    // Save updated projects
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('tartibix_projects', JSON.stringify(projects))
-    }
+    // Save updated project
+    saveLocalProject(projects[projectIndex])
 
     return NextResponse.json(projects[projectIndex].executionPlan![taskIndex])
   } catch (error) {

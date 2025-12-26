@@ -26,8 +26,8 @@ export interface Role {
 const USERS_FILE = path.join(process.cwd(), 'data', 'users.json')
 const ROLES_FILE = path.join(process.cwd(), 'data', 'roles.json')
 
-// Permission groups
-export const PERMISSION_GROUPS = [
+// Permission groups (internal, not exported)
+const PERMISSION_GROUPS = [
   'Projects',
   'Tasks',
   'Documents',

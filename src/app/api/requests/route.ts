@@ -28,8 +28,8 @@ export interface RequestAttachment {
 // Storage file path
 const REQUESTS_FILE = path.join(process.cwd(), 'data', 'requests.json')
 
-// Request types
-export const REQUEST_TYPES = [
+// Request types (internal, not exported to avoid Next.js route constraint issues)
+const REQUEST_TYPES = [
   'Purchase request',
   'Software access',
   'Maintenance support',
