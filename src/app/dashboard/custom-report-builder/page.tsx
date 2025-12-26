@@ -4,33 +4,53 @@ import { useEffect, useRef, useState } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
 
-const reportData = {
-	projects: [
-		{ label: 'Atlas Rebrand', value: 'atlas-rebrand' },
-		{ label: 'Northwind Migration', value: 'northwind-migration' },
-		{ label: 'Supply Chain Dashboard', value: 'supply-chain-dashboard' },
-		{ label: 'Tartibix Platform', value: 'tartibix-platform' },
-	],
-	dateRanges: [
-		{ label: 'Jan 1, 2024 - Dec 31, 2024', value: '2024-full' },
-		{ label: 'Jul 1, 2024 - Dec 31, 2024', value: '2024-h2' },
-		{ label: 'Jan 1, 2025 - Jun 30, 2025', value: '2025-h1' },
-	],
-	dataTypes: [
-		{ label: 'Financial Overview', value: 'financial-overview' },
-		{ label: 'Resource Allocation', value: 'resource-allocation' },
-		{ label: 'Task Completion', value: 'task-completion' },
-		{ label: 'Risk & Compliance', value: 'risk-compliance' },
-	],
+// Static report configuration data
+const dateRanges = [
+	{ label: 'Jan 1, 2024 - Dec 31, 2024', value: '2024-full' },
+	{ label: 'Jul 1, 2024 - Dec 31, 2024', value: '2024-h2' },
+	{ label: 'Jan 1, 2025 - Jun 30, 2025', value: '2025-h1' },
+]
+
+const dataTypes = [
+	{ label: 'Financial Overview', value: 'financial-overview' },
+	{ label: 'Resource Allocation', value: 'resource-allocation' },
+	{ label: 'Task Completion', value: 'task-completion' },
+	{ label: 'Risk & Compliance', value: 'risk-compliance' },
+]
+
+type Project = {
+	projectId: string
+	projectName: string
 }
 
 export default function CustomReportBuilderPage() {
-
+	const [projects, setProjects] = useState<{ label: string; value: string }[]>([])
+	const [isLoading, setIsLoading] = useState(true)
 	const [selectedProject, setSelectedProject] = useState<string>('')
-	const [selectedDateRange, setSelectedDateRange] = useState<string>(
-		reportData.dateRanges[0]?.value ?? ''
-	)
+	const [selectedDateRange, setSelectedDateRange] = useState<string>(dateRanges[0]?.value ?? '')
 	const [selectedDataType, setSelectedDataType] = useState<string>('')
+
+	// Fetch projects from API
+	useEffect(() => {
+		async function fetchProjects() {
+			try {
+				const res = await fetch('/api/projects')
+				if (res.ok) {
+					const data = await res.json()
+					const projectOptions = (data.projects || []).map((p: Project) => ({
+						label: p.projectName,
+						value: p.projectId
+					}))
+					setProjects(projectOptions)
+				}
+			} catch (error) {
+				console.error('Error fetching projects:', error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+		fetchProjects()
+	}, [])
 
 	return (
 		<DashboardShell>
@@ -41,17 +61,18 @@ export default function CustomReportBuilderPage() {
 					<div className="mx-auto flex min-h-[520px] w-full max-w-[1014px] flex-col gap-9">
 						<SelectField
 							label="Project Name"
-							placeholder="Project"
+							placeholder={isLoading ? "Loading projects..." : "Select project"}
 							size="lg"
-							options={reportData.projects}
+							options={projects}
 							selectedValue={selectedProject}
 							onSelect={setSelectedProject}
+							disabled={isLoading}
 						/>
 						<SelectField
 							label="Date Range"
 							placeholder="Select date range"
 							size="md"
-							options={reportData.dateRanges}
+							options={dateRanges}
 							selectedValue={selectedDateRange}
 							onSelect={setSelectedDateRange}
 						/>
@@ -59,11 +80,11 @@ export default function CustomReportBuilderPage() {
 							label="Data Type"
 							placeholder="Select data type"
 							size="md"
-							options={reportData.dataTypes}
+							options={dataTypes}
 							selectedValue={selectedDataType}
 							onSelect={setSelectedDataType}
 						/>
-						<DownloadSection />
+						<DownloadSection disabled={!selectedProject || !selectedDataType} />
 					</div>
 				</section>
 			</div>
@@ -83,6 +104,7 @@ function SelectField({
 	onSelect,
 	placeholder = '',
 	size = 'md',
+	disabled = false,
 }: {
 	label: string
 	options: SelectOption[]
@@ -90,6 +112,7 @@ function SelectField({
 	onSelect: (value: string) => void
 	placeholder?: string
 	size?: 'md' | 'lg'
+	disabled?: boolean
 }) {
 	const [isOpen, setIsOpen] = useState(false)
 	const containerRef = useRef<HTMLDivElement | null>(null)
@@ -126,11 +149,12 @@ function SelectField({
 			<span className="text-[20px] font-semibold leading-[1.2]">{label}</span>
 			<button
 				type="button"
+				disabled={disabled}
 				className={`flex min-h-[50px] items-center justify-between rounded-[7px] border border-[#323449] bg-[#171821] px-5 py-3 text-left text-soft-white transition focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#171821] ${
 					isPlaceholder ? 'text-soft-white/50' : 'text-soft-white'
-				}`}
+				} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 				aria-expanded={isOpen}
-				onClick={() => setIsOpen(prev => !prev)}
+				onClick={() => !disabled && setIsOpen(prev => !prev)}
 			>
 				<span className={`flex-1 truncate ${valueSize} ${isPlaceholder ? 'text-soft-white/55' : 'text-soft-white'} font-normal leading-[1.4]`}>
 					{displayLabel}
@@ -175,24 +199,28 @@ function SelectField({
 	)
 }
 
-function DownloadSection() {
+function DownloadSection({ disabled = false }: { disabled?: boolean }) {
 	return (
 		<div className="mt-6 flex flex-col gap-3 text-soft-white">
 			<span className="text-[20px] font-semibold leading-[1.2]">Download</span>
 			<div className="flex flex-wrap gap-4">
-				<DownloadButton accent label="Pdf" />
-				<DownloadButton label="Excel" />
+				<DownloadButton accent label="Pdf" disabled={disabled} />
+				<DownloadButton label="Excel" disabled={disabled} />
 			</div>
+			{disabled && (
+				<p className="text-sm text-soft-white/50">Select a project and data type to enable downloads</p>
+			)}
 		</div>
 	)
 }
 
-function DownloadButton({ label, accent = false }: { label: string; accent?: boolean }) {
+function DownloadButton({ label, accent = false, disabled = false }: { label: string; accent?: boolean; disabled?: boolean }) {
 	if (accent) {
 		return (
 			<button
 				type="button"
-				className="h-[47px] min-w-[159px] rounded-[10px] bg-accent px-8 text-center font-display text-[20px] font-bold leading-[30px] text-[#2B2B36] shadow-[0_0_10px_rgba(169,223,216,0.25)] transition hover:shadow-[0_0_12px_rgba(169,223,216,0.4)]"
+				disabled={disabled}
+				className={`h-[47px] min-w-[159px] rounded-[10px] bg-accent px-8 text-center font-display text-[20px] font-bold leading-[30px] text-[#2B2B36] shadow-[0_0_10px_rgba(169,223,216,0.25)] transition hover:shadow-[0_0_12px_rgba(169,223,216,0.4)] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 			>
 				{label}
 			</button>
@@ -202,7 +230,8 @@ function DownloadButton({ label, accent = false }: { label: string; accent?: boo
 	return (
 		<button
 			type="button"
-			className="h-[47px] min-w-[159px] rounded-[10px] border border-[#323449] bg-[#10111B] px-8 text-center font-display text-[20px] font-medium leading-[30px] text-soft-white transition hover:border-accent/60 hover:bg-[#181A27]"
+			disabled={disabled}
+			className={`h-[47px] min-w-[159px] rounded-[10px] border border-[#323449] bg-[#10111B] px-8 text-center font-display text-[20px] font-medium leading-[30px] text-soft-white transition hover:border-accent/60 hover:bg-[#181A27] ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
 		>
 			{label}
 		</button>

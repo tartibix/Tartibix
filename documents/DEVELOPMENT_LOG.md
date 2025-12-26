@@ -177,6 +177,108 @@
    35.6 [Project Detail Pages Enhancement](#356-project-detail-pages-enhancement)
    35.7 [Data Persistence and Storage](#357-data-persistence-and-storage)
    35.8 [File Structure Organization](#358-file-structure-organization)
+36. [Real Construction Project Data Integration](#36-real-construction-project-data-integration)
+   36.1 [Excel Parser Implementation](#361-excel-parser-implementation)
+   36.2 [Database Schema Design](#362-database-schema-design)
+   36.3 [Supabase Client Integration](#363-supabase-client-integration)
+   36.4 [Dual Storage Mode](#364-dual-storage-mode)
+   36.5 [Project Data Types Enhancement](#365-project-data-types-enhancement)
+37. [Full Backend API Implementation](#37-full-backend-api-implementation)
+   37.1 [Projects API](#371-projects-api)
+   37.2 [Tasks API](#372-tasks-api)
+   37.3 [Resources API](#373-resources-api)
+   37.4 [Notifications API](#374-notifications-api)
+   37.5 [Documents API](#375-documents-api)
+   37.6 [Users API](#376-users-api)
+   37.7 [Requests API](#377-requests-api)
+38. [Dashboard Pages Backend Integration Audit](#38-dashboard-pages-backend-integration-audit)
+   38.1 [Admin Panel Page Update](#381-admin-panel-page-update)
+   38.2 [Request Page Update](#382-request-page-update)
+   38.3 [Custom Report Builder Update](#383-custom-report-builder-update)
+   38.4 [Resource Allocation Scheduler Update](#384-resource-allocation-scheduler-update)
+   38.5 [Project Budget Page Update](#385-project-budget-page-update)
+   38.6 [Project Detail Page Cleanup](#386-project-detail-page-cleanup)
+   38.7 [API Routes Type Fixes](#387-api-routes-type-fixes)
+   38.8 [Verification Summary](#388-verification-summary)
+   26.2 [Static Data & Components](#static-data--components)
+   26.3 [Asset Pipeline](#asset-pipeline)
+   26.4 [Validation & Known Issues](#validation--known-issues)
+27. [Resource Card Polish & Icon Cleanup](#resource-card-polish--icon-cleanup)
+   27.1 [Shadow & Border Softening](#shadow--border-softening)
+   27.2 [Icon Wrapper Removal](#icon-wrapper-removal)
+28. [Admin Panel Implementation](#admin-panel-implementation)
+   28.1 [Initial Layout Build](#initial-layout-build)
+   28.2 [Shadow & Background Refinement](#shadow--background-refinement)
+   28.3 [Roles Tab Feature Parity](#roles-tab-feature-parity)
+   28.4 [Visual Alignment Pass](#visual-alignment-pass)
+29. [Login Gate & Metadata Enhancements](#login-gate--metadata-enhancements)
+   29.1 [Demo Credentials & Redirect](#demo-credentials--redirect)
+   29.2 [Social Metadata Refresh](#social-metadata-refresh)
+30. [Time Log Implementation](#time-log-implementation)
+   30.1 [Figma-Accurate Design Recreation](#figma-accurate-design-recreation)
+   30.2 [Asset Integration](#asset-integration)
+   30.3 [Data Structure](#data-structure)
+   30.4 [Interactive Elements](#interactive-elements)
+   30.5 [Layout Consistency](#layout-consistency)
+   30.6 [Image Format Correction](#image-format-correction)
+   30.7 [Shadow Intensity Reduction](#shadow-intensity-reduction)
+   30.8 [Comprehensive Data Model Expansion](#comprehensive-data-model-expansion)
+   30.9 [Advanced Search and Filter System](#advanced-search-and-filter-system)
+   30.10 [Interactive Table Components](#interactive-table-components)
+   30.11 [Enhanced Card Features](#enhanced-card-features)
+   30.12 [Pagination and Results Display](#pagination-and-results-display)
+   30.13 [Final Implementation Summary](#final-implementation-summary)
+   30.14 [Additional UI States Implementation](#additional-ui-states-implementation)
+   30.15 [Form View with File Upload](#form-view-with-file-upload)
+   30.16 [Task Details Modal](#task-details-modal)
+   30.17 [Notes Modal](#notes-modal)
+   30.18 [Log Type Dropdown System](#log-type-dropdown-system)
+   30.19 [Shadow Intensity Reduction Pass](#shadow-intensity-reduction-pass)
+31. [Project Management Create Flow - Figma UI Implementation](#project-management-create-flow---figma-ui-implementation)
+   31.1 [Figma Design Analysis](#311-figma-design-analysis)
+   31.2 [Data Structure Updates](#312-data-structure-updates)
+   31.3 [DocumentsCategoriesView Component](#313-documentscategoriesview-component)
+   31.4 [DocumentsTableView Component](#314-documentstableview-component)
+   31.5 [TeamHierarchyView Component](#315-teamhierarchyview-component)
+   31.6 [State Management Updates](#316-state-management-updates)
+   31.7 [Implementation Summary](#317-implementation-summary)
+32. [Project Management Detail Pages Implementation](#project-management-detail-pages-implementation)
+   32.1 [Figma Design Analysis](#321-figma-design-analysis)
+   32.2 [Project Detail Page](#322-project-detail-page)
+   32.3 [Gantt Chart View](#323-gantt-chart-view)
+   32.4 [Kanban Board View](#324-kanban-board-view)
+   32.5 [Timeline View](#325-timeline-view)
+   32.6 [Documents Tab](#326-documents-tab)
+   32.7 [Team Tab](#327-team-tab)
+   32.8 [Financials Tab](#328-financials-tab)
+   32.9 [Project Budget Page](#329-project-budget-page)
+   32.10 [Edit Project Page](#3210-edit-project-page)
+   32.11 [Project Settings Page](#3211-project-settings-page)
+   32.12 [Navigation Integration](#3212-navigation-integration)
+   32.13 [Professional Icons for Documents](#3213-professional-icons-for-documents)
+33. [Site & Project Logs - Status Mechanism Implementation](#33-site--project-logs---status-mechanism-implementation)
+   33.1 [Figma Design Analysis](#331-figma-design-analysis)
+   33.2 [Data Structure Enhancement](#332-data-structure-enhancement)
+   33.3 [Table Status Column Addition](#333-table-status-column-addition)
+   33.4 [Status View Modal Implementation](#334-status-view-modal-implementation)
+   33.5 [State Management Enhancement](#335-state-management-enhancement)
+   33.6 [Design Alignment Notes](#336-design-alignment-notes)
+34. [Time Log Data Model Enhancement](#34-time-log-data-model-enhancement)
+   34.1 [Work Log Data Structure](#341-work-log-data-structure)
+   34.2 [Sample Data Integration](#342-sample-data-integration)
+   34.3 [Upload Image Assets](#343-upload-image-assets)
+   34.4 [Data Alignment with Project Structure](#344-data-alignment-with-project-structure)
+   34.5 [User Experience Enhancements](#345-user-experience-enhancements)
+   34.6 [Technical Implementation Details](#346-technical-implementation-details)
+35. [Project Management System - Full Backend Integration](#35-project-management-system---full-backend-integration)
+   35.1 [Project Storage System](#351-project-storage-system)
+   35.2 [API Routes Implementation](#352-api-routes-implementation)
+   35.3 [Project Setup Wizard Component](#353-project-setup-wizard-component)
+   35.4 [Supporting Documents Upload Component](#354-supporting-documents-upload-component)
+   35.5 [Projects Page Integration](#355-projects-page-integration)
+   35.6 [Project Detail Pages Enhancement](#356-project-detail-pages-enhancement)
+   35.7 [Data Persistence and Storage](#357-data-persistence-and-storage)
+   35.8 [File Structure Organization](#358-file-structure-organization)
 
 ---
 
@@ -4021,6 +4123,506 @@ export function generateProjectId(): string
 - Activity timeline
 - Notification system
 - Role-based access control
+
+---
+
+*Document created on November 5, 2025*  
+*Last updated: December 26, 2025*
+
+---
+
+## 36. Real Construction Project Data Integration
+
+### 36.1 Excel Parser Implementation
+
+Created a comprehensive Excel parser to handle real construction project data from the `PROJECTS_BIG_DATA` folder.
+
+**File Created:** `src/lib/excelParser.ts`
+
+**Key Features:**
+- Parses 8 Excel file types per project:
+  - `01_Employees.xlsx` - Staff data with job titles, ranks, daily costs
+  - `02_Equipment.xlsx` - Equipment inventory with codes and costs
+  - `03_Materials.xlsx` - Material inventory with quantities and values
+  - `04_Services.xlsx` - Service definitions
+  - `05_ExecutionPlan.xlsx` - Task scheduling with dependencies
+  - `06_SupportingDocuments.xlsx` - Document metadata
+  - `07_BasicInfo.xlsx` - Project details (owner, consultant, contract)
+  - `08_ExecutionPlanWithResources.xlsx` - Resource assignments
+
+**Exported Functions:**
+```typescript
+export async function parseProjectExcelFiles(projectFolderPath: string): Promise<ProjectSetupData>
+export async function parseAllProjectsFromBigData(): Promise<ProjectSetupData[]>
+```
+
+### 36.2 Database Schema Design
+
+Created PostgreSQL/Supabase database schema for production deployment.
+
+**File Created:** `data/database-schema.sql`
+
+**Tables Defined:**
+- `projects` - Core project information
+- `employees` - Project staff
+- `equipment` - Equipment inventory
+- `materials` - Material inventory
+- `services` - Service definitions
+- `execution_plan_tasks` - Task scheduling
+- `supporting_documents` - Document storage
+- `notifications` - User notifications
+- `audit_log` - Activity tracking
+- `documents` - Document management
+- `users` - User accounts
+- `roles` - Role definitions
+- `requests` - Request tracking
+
+**Security Features:**
+- Row Level Security (RLS) policies
+- Role-based access control
+- Audit logging triggers
+
+### 36.3 Supabase Client Integration
+
+**File Created:** `src/lib/supabaseClient.ts`
+
+**Configuration:**
+```typescript
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+```
+
+**Exported Functions:**
+```typescript
+export function getSupabase(): SupabaseClient | null
+export function isSupabaseConfigured(): boolean
+```
+
+### 36.4 Dual Storage Mode
+
+The system supports both file-based and database storage with automatic fallback.
+
+**Environment Variable:** `USE_DATABASE=true|false`
+
+**Storage Logic:**
+- When `USE_DATABASE=true` and Supabase is configured → Uses PostgreSQL
+- Otherwise → Uses local JSON files in `/data/projects/`
+
+### 36.5 Project Data Types Enhancement
+
+**File Updated:** `src/lib/projectSetupTypes.ts`
+
+**Interfaces Defined:**
+```typescript
+export interface Employee {
+  id: string
+  employeeCode: string
+  jobTitle: string
+  rank: string
+  dailyCost: number
+}
+
+export interface Equipment {
+  id: string
+  equipmentCode: string
+  equipmentName: string
+  responsiblePosition: string
+  responsibleEmployee: string
+  dailyCost?: number
+}
+
+export interface Material {
+  id: string
+  materialCode: string
+  materialName: string
+  description: string
+  requiredQuantity: number
+  unit: string
+  estimatedValue?: number
+}
+
+export interface Service {
+  id: string
+  serviceCode: string
+  serviceName: string
+  description: string
+  unit: string
+}
+
+export interface ExecutionPlanTask {
+  id: string
+  taskId: string
+  taskName: string
+  startDate: string
+  endDate: string
+  parentId?: string
+  dependencies?: string
+  employeeCode?: string
+  employeeCount?: number
+  equipmentCode?: string
+  equipmentCount?: number
+  materialCode?: string
+  materialQuantity?: number
+  serviceCode?: string
+  notes?: string
+}
+```
+
+---
+
+## 37. Full Backend API Implementation
+
+### 37.1 Projects API
+
+**File:** `src/app/api/projects/route.ts`
+
+**Endpoints:**
+- `GET /api/projects` - List all projects with optional filtering
+- `GET /api/projects?id=<id>` - Get single project
+- `POST /api/projects` - Create new project
+- `PUT /api/projects` - Update existing project
+- `DELETE /api/projects?id=<id>` - Delete project
+
+**Features:**
+- Initiative filtering
+- Status filtering
+- Search by name
+- Progress calculation
+- Health status computation
+
+### 37.2 Tasks API
+
+**File:** `src/app/api/tasks/route.ts`
+
+**Endpoints:**
+- `GET /api/tasks` - List all tasks across projects
+- `GET /api/tasks?projectId=<id>` - Get tasks for specific project
+- `GET /api/tasks?status=<status>` - Filter by status
+- `GET /api/tasks?assignee=<name>` - Filter by assignee
+
+**Computed Fields:**
+```typescript
+function computeTaskStatus(task: ExecutionPlanTask): string {
+  const now = new Date()
+  const start = new Date(task.startDate)
+  const end = new Date(task.endDate)
+  
+  if (end < now) return 'Completed'
+  if (start <= now && now <= end) return 'In Progress'
+  return 'Pending'
+}
+```
+
+**Statistics Returned:**
+```typescript
+{
+  tasks: TaskWithProject[],
+  stats: { total, completed, inProgress, pending, overdue },
+  progress: number
+}
+```
+
+### 37.3 Resources API
+
+**File:** `src/app/api/resources/route.ts`
+
+**Endpoints:**
+- `GET /api/resources` - Get resource summary
+- `GET /api/resources?type=employees` - Get all employees
+- `GET /api/resources?type=equipment` - Get all equipment
+- `GET /api/resources?type=materials` - Get all materials
+- `GET /api/resources?type=services` - Get all services
+
+**Summary Structure:**
+```typescript
+interface ResourceSummary {
+  employees: { total, byDepartment, items }
+  equipment: { total, available, inUse, maintenance, items }
+  materials: { total, categories, lowStock, items }
+  services: { total, active, items }
+}
+```
+
+### 37.4 Notifications API
+
+**File:** `src/app/api/notifications/route.ts`
+
+**Endpoints:**
+- `GET /api/notifications` - List notifications
+- `GET /api/notifications?type=audit` - Get audit log
+- `POST /api/notifications` - Create notification
+- `PUT /api/notifications` - Mark as read
+
+**Data Storage:** `data/notifications.json`
+
+### 37.5 Documents API
+
+**File:** `src/app/api/documents/route.ts`
+
+**Endpoints:**
+- `GET /api/documents` - List all documents
+- `GET /api/documents?category=<cat>` - Filter by category
+- `POST /api/documents` - Add document
+- `PUT /api/documents` - Update document
+- `DELETE /api/documents?id=<id>` - Delete document
+
+**Statistics:**
+```typescript
+{
+  documents: Document[],
+  categories: string[],
+  stats: { total, approved, pending, rejected }
+}
+```
+
+### 37.6 Users API
+
+**File:** `src/app/api/users/route.ts`
+
+**Endpoints:**
+- `GET /api/users` - List all users
+- `GET /api/users?type=roles` - Get role definitions
+- `POST /api/users` - Create user
+- `POST /api/users` with `type: 'role'` - Create role
+- `PUT /api/users` - Update user
+- `DELETE /api/users?id=<id>` - Delete user
+
+### 37.7 Requests API
+
+**File:** `src/app/api/requests/route.ts`
+
+**Endpoints:**
+- `GET /api/requests` - List all requests
+- `POST /api/requests` - Submit new request
+- `PUT /api/requests` - Update request status
+
+**Request Structure:**
+```typescript
+interface Request {
+  id: string
+  type: string
+  description: string
+  status: 'pending' | 'approved' | 'rejected'
+  submittedAt: string
+  attachments: Attachment[]
+}
+```
+
+---
+
+## 38. Dashboard Pages Backend Integration Audit
+
+A comprehensive audit was performed to ensure all dashboard pages connect to backend APIs instead of using hardcoded data.
+
+### 38.1 Admin Panel Page Update
+
+**File:** `src/app/dashboard/admin-panel/page.tsx`
+
+**Changes Made:**
+- Converted from hardcoded `users` and `roles` arrays to API-fetched data
+- Added `useEffect` to fetch from `/api/users` and `/api/users?type=roles`
+- Added search functionality with dynamic filtering
+- Added loading states and empty states
+- Created modal components for AddUserModal and AddRoleModal
+- Form submissions POST to `/api/users`
+
+**Key Components Updated:**
+- `AdminPanelPage` - Main component with state management
+- `AdminPanelControls` - Tab switching with dynamic Add buttons
+- `UserTable` - Displays users with search, empty states
+- `RolesPanel` - Displays roles with permission matrix
+- `AddUserModal` - Form modal for new users
+- `AddRoleModal` - Form modal for new roles
+
+### 38.2 Request Page Update
+
+**File:** `src/app/dashboard/request-page/page.tsx`
+
+**Changes Made:**
+- Converted from hardcoded `requestData` to API-fetched data
+- Added state for `requests`, `uploads`, `isLoading`, `isSubmitting`
+- Added file upload functionality with progress simulation
+- Form submission POSTs to `/api/requests`
+- Track Status section displays dynamic requests from API
+
+**Key Features:**
+- File drag-and-drop upload
+- Upload progress indicators
+- Request type selection (General, Approval, Technical, Financial)
+- Real-time request tracking
+
+### 38.3 Custom Report Builder Update
+
+**File:** `src/app/dashboard/custom-report-builder/page.tsx`
+
+**Changes Made:**
+- Removed hardcoded projects array
+- Added `useEffect` to fetch projects from `/api/projects`
+- Added loading state with "Loading projects..." placeholder
+- Added `disabled` prop support to form controls
+- Updated `DownloadSection` with disabled state during loading
+
+### 38.4 Resource Allocation Scheduler Update
+
+**File:** `src/components/dashboard/ResourceAllocationScheduler.tsx`
+
+**Complete Rewrite:**
+
+**Old Implementation:**
+- Hardcoded `baseScheduleRows` with sample employees (Emily, James, Anna, Michael)
+- Hardcoded `filterGroups` with Project A/B/C options
+- Static `projectPalette` with 3 colors
+
+**New Implementation:**
+```typescript
+type ProjectAllocation = {
+  id: string
+  project: string
+  projectName: string
+  startDay: number
+  spanDays: number
+  color: string
+}
+
+const projectColors = [
+  { fill: 'rgba(169, 223, 216, 0.48)', shadow: '...', text: '#F6F6F6' },
+  // ... 6 dynamic colors
+]
+
+// Fetches projects from API
+useEffect(() => {
+  async function fetchProjects() {
+    const res = await fetch('/api/projects')
+    const data = await res.json()
+    setProjects(data.projects || [])
+    // Build dynamic filter options
+  }
+  fetchProjects()
+}, [])
+
+// Builds schedule rows from project employees
+const rows = useMemo((): ScheduleRow[] => {
+  projects.forEach((project, projectIndex) => {
+    project.employees?.forEach((employee) => {
+      // Create allocation entries
+    })
+  })
+  return Array.from(employeeMap.values())
+}, [projects])
+```
+
+### 38.5 Project Budget Page Update
+
+**File:** `src/app/dashboard/projects/[id]/budget/page.tsx`
+
+**Changes Made:**
+- Removed hardcoded `budgetSummary`, `budgetCategories`, `invoices`, `monthlySpending`
+- Added `useEffect` to fetch project from `/api/projects?id=...`
+- Calculate budget dynamically from project data:
+
+```typescript
+const budgetData = useMemo(() => {
+  // Labor costs from employees
+  const laborBudget = (project.employees || []).reduce((sum, emp) => {
+    return sum + (emp.dailyCost * 22)
+  }, 0)
+  
+  // Materials costs
+  const materialsBudget = (project.materials || []).reduce((sum, mat) => {
+    return sum + (mat.estimatedValue || 0)
+  }, 0)
+  
+  // Equipment costs
+  const equipmentBudget = (project.equipment || []).reduce((sum, eq) => {
+    return sum + (eq.dailyCost || 0) * 30
+  }, 0)
+  
+  // Generate invoices from materials/equipment
+  const invoices = [
+    ...project.materials.map(...),
+    ...project.equipment.map(...)
+  ]
+  
+  return { totalBudget, totalSpent, categories, invoices }
+}, [project])
+```
+
+### 38.6 Project Detail Page Cleanup
+
+**File:** `src/app/dashboard/projects/[id]/page.tsx`
+
+**Changes Made:**
+- Removed ~100 lines of unused hardcoded sample data
+- Confirmed views already use real project data:
+  - `GanttView` uses `project.executionPlan`
+  - `KanbanView` groups tasks by computed status
+  - `TimelineView` groups tasks by month
+  - `TeamTab` uses `project.employees`
+  - `FinancialsTab` calculates from employees/materials/equipment
+
+### 38.7 API Routes Type Fixes
+
+**Tasks API Fix:**
+
+```typescript
+// Added computed status function
+function computeTaskStatus(task: ExecutionPlanTask): string {
+  const now = new Date()
+  const start = new Date(task.startDate)
+  const end = new Date(task.endDate)
+  
+  if (end < now) return 'Completed'
+  if (start <= now && now <= end) return 'In Progress'
+  return 'Pending'
+}
+
+// Extended TaskWithProject interface
+export interface TaskWithProject extends ExecutionPlanTask {
+  projectId: string
+  projectName: string
+  projectPhase?: string
+  status?: string
+  assignedTo?: string
+}
+```
+
+**Resources API Fix:**
+- Used `emp.rank` instead of non-existent `emp.department`
+- Used `mat.requiredQuantity` instead of `mat.quantity`
+- Estimated equipment status distribution since `status` field doesn't exist
+
+### 38.8 Verification Summary
+
+**Pages Verified as Connected to Backend:**
+
+| Page | API Endpoint | Status |
+|------|-------------|--------|
+| Main Dashboard | `/api/projects` | ✅ Working |
+| Projects List | `/api/projects` | ✅ Working |
+| Project Detail | `/api/projects?id=` | ✅ Working |
+| Project Budget | `/api/projects?id=` | ✅ Updated |
+| Project Edit | `/api/projects` | ✅ Working |
+| Tasks Page | `/api/tasks` | ✅ Working |
+| Resources Page | `/api/resources` | ✅ Working |
+| Notifications | `/api/notifications` | ✅ Working |
+| Documents | `/api/documents` | ✅ Working |
+| Time Log | `projectStorage` | ✅ Working |
+| Admin Panel | `/api/users` | ✅ Updated |
+| Request Page | `/api/requests` | ✅ Updated |
+| Report Builder | `/api/projects` | ✅ Updated |
+| Allocation Scheduler | `/api/projects` | ✅ Updated |
+
+**TypeScript Compilation:** ✅ No errors
+
+**Files Modified in This Session:**
+1. `src/app/dashboard/admin-panel/page.tsx`
+2. `src/app/dashboard/request-page/page.tsx`
+3. `src/app/dashboard/custom-report-builder/page.tsx`
+4. `src/components/dashboard/ResourceAllocationScheduler.tsx`
+5. `src/app/dashboard/projects/[id]/page.tsx`
+6. `src/app/dashboard/projects/[id]/budget/page.tsx`
+7. `src/app/api/tasks/route.ts`
+8. `src/app/api/resources/route.ts`
 
 ---
 

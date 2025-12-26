@@ -1,96 +1,170 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
+import { ProjectSetupData } from '@/lib/projectSetupTypes'
 
-// Budget data
-const budgetSummary = {
-  totalBudget: 1250000,
-  totalSpent: 875000,
-  totalRemaining: 375000,
-  budgetUtilization: 70,
+type BudgetCategory = {
+  id: string
+  name: string
+  budget: number
+  spent: number
+  color: string
 }
 
-const budgetCategories = [
-  { id: 'labor', name: 'Labor Costs', budget: 500000, spent: 350000, color: '#A9DFD8' },
-  { id: 'materials', name: 'Materials', budget: 400000, spent: 320000, color: '#FFE48C' },
-  { id: 'equipment', name: 'Equipment', budget: 200000, spent: 125000, color: '#C5D3FF' },
-  { id: 'subcontractors', name: 'Subcontractors', budget: 100000, spent: 60000, color: '#F8B4B4' },
-  { id: 'overhead', name: 'Overhead & Admin', budget: 50000, spent: 20000, color: '#D1D5DB' },
-]
-
-const invoices = [
-  {
-    id: 'inv1',
-    invoiceNumber: 'INV-2024-001',
-    vendor: 'ABC Contractors',
-    category: 'Subcontractors',
-    amount: 15000,
-    date: '2024-01-15',
-    dueDate: '2024-02-15',
-    status: 'Paid',
-  },
-  {
-    id: 'inv2',
-    invoiceNumber: 'INV-2024-002',
-    vendor: 'Steel Supply Co',
-    category: 'Materials',
-    amount: 32500,
-    date: '2024-01-18',
-    dueDate: '2024-02-18',
-    status: 'Paid',
-  },
-  {
-    id: 'inv3',
-    invoiceNumber: 'INV-2024-003',
-    vendor: 'Equipment Rentals LLC',
-    category: 'Equipment',
-    amount: 8750,
-    date: '2024-01-22',
-    dueDate: '2024-02-22',
-    status: 'Pending',
-  },
-  {
-    id: 'inv4',
-    invoiceNumber: 'INV-2024-004',
-    vendor: 'Concrete Solutions',
-    category: 'Materials',
-    amount: 45000,
-    date: '2024-01-25',
-    dueDate: '2024-02-25',
-    status: 'Overdue',
-  },
-  {
-    id: 'inv5',
-    invoiceNumber: 'INV-2024-005',
-    vendor: 'Design Partners',
-    category: 'Labor Costs',
-    amount: 22000,
-    date: '2024-01-28',
-    dueDate: '2024-02-28',
-    status: 'Draft',
-  },
-]
-
-const monthlySpending = [
-  { month: 'Jan', planned: 80000, actual: 75000 },
-  { month: 'Feb', planned: 95000, actual: 102000 },
-  { month: 'Mar', planned: 110000, actual: 98000 },
-  { month: 'Apr', planned: 125000, actual: 130000 },
-  { month: 'May', planned: 140000, actual: 145000 },
-  { month: 'Jun', planned: 150000, actual: 142000 },
-  { month: 'Jul', planned: 130000, actual: 128000 },
-  { month: 'Aug', planned: 120000, actual: 55000 },
-  { month: 'Sep', planned: 100000, actual: 0 },
-  { month: 'Oct', planned: 90000, actual: 0 },
-  { month: 'Nov', planned: 70000, actual: 0 },
-  { month: 'Dec', planned: 40000, actual: 0 },
-]
+type Invoice = {
+  id: string
+  invoiceNumber: string
+  vendor: string
+  category: string
+  amount: number
+  date: string
+  dueDate: string
+  status: string
+}
 
 export default function ProjectBudgetPage({ params }: { params: { id: string } }) {
+  const [project, setProject] = useState<ProjectSetupData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
   const [activeInvoiceFilter, setActiveInvoiceFilter] = useState<string>('all')
+
+  // Fetch project data
+  useEffect(() => {
+    async function fetchProject() {
+      try {
+        const response = await fetch(`/api/projects?id=${params.id}`)
+        if (response.ok) {
+          const data = await response.json()
+          setProject(data)
+        }
+      } catch (error) {
+        console.error('Error fetching project:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchProject()
+  }, [params.id])
+
+  // Calculate budget data from project
+  const budgetData = useMemo(() => {
+    if (!project) {
+      return {
+        totalBudget: 0,
+        totalSpent: 0,
+        totalRemaining: 0,
+        budgetUtilization: 0,
+        categories: [] as BudgetCategory[],
+        invoices: [] as Invoice[],
+      }
+    }
+
+    // Calculate labor costs from employees (using dailyCost)
+    const laborBudget = (project.employees || []).reduce((sum, emp) => {
+      const dailyCost = emp.dailyCost || 0
+      // Assume 22 working days per month for the project duration
+      return sum + (dailyCost * 22)
+    }, 0)
+    const laborSpent = laborBudget * (project.progress || 50) / 100
+
+    // Calculate materials costs (using estimatedValue)
+    const materialsBudget = (project.materials || []).reduce((sum, mat) => {
+      return sum + (mat.estimatedValue || 0)
+    }, 0)
+    const materialsSpent = materialsBudget * (project.progress || 50) / 100
+
+    // Calculate equipment costs (using dailyCost)
+    const equipmentBudget = (project.equipment || []).reduce((sum, eq) => {
+      const dailyCost = eq.dailyCost || 0
+      // Assume 30 days for the project duration
+      return sum + (dailyCost * 30)
+    }, 0)
+    const equipmentSpent = equipmentBudget * (project.progress || 50) / 100
+
+    // Total from contract value or calculated
+    const totalBudget = project.contractValue || (laborBudget + materialsBudget + equipmentBudget) || 1000000
+    const totalSpent = laborSpent + materialsSpent + equipmentSpent
+    const totalRemaining = totalBudget - totalSpent
+    const budgetUtilization = totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0
+
+    const categories: BudgetCategory[] = [
+      { id: 'labor', name: 'Labor Costs', budget: laborBudget || totalBudget * 0.4, spent: laborSpent, color: '#A9DFD8' },
+      { id: 'materials', name: 'Materials', budget: materialsBudget || totalBudget * 0.32, spent: materialsSpent, color: '#FFE48C' },
+      { id: 'equipment', name: 'Equipment', budget: equipmentBudget || totalBudget * 0.16, spent: equipmentSpent, color: '#C5D3FF' },
+      { id: 'subcontractors', name: 'Subcontractors', budget: totalBudget * 0.08, spent: totalBudget * 0.08 * (project.progress || 50) / 100, color: '#F8B4B4' },
+      { id: 'overhead', name: 'Overhead & Admin', budget: totalBudget * 0.04, spent: totalBudget * 0.04 * (project.progress || 50) / 100, color: '#D1D5DB' },
+    ]
+
+    // Generate invoices from materials/equipment purchases
+    const invoices: Invoice[] = [
+      ...(project.materials || []).slice(0, 3).map((mat, i) => ({
+        id: `inv-mat-${i}`,
+        invoiceNumber: `INV-${project.projectId?.slice(-4) || '2024'}-M${String(i + 1).padStart(3, '0')}`,
+        vendor: mat.materialName || 'Material Supplier',
+        category: 'Materials',
+        amount: mat.estimatedValue || 0,
+        date: project.contractStartDate || new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: i === 0 ? 'Paid' : i === 1 ? 'Pending' : 'Draft',
+      })),
+      ...(project.equipment || []).slice(0, 2).map((eq, i) => ({
+        id: `inv-eq-${i}`,
+        invoiceNumber: `INV-${project.projectId?.slice(-4) || '2024'}-E${String(i + 1).padStart(3, '0')}`,
+        vendor: eq.equipmentName || 'Equipment Vendor',
+        category: 'Equipment',
+        amount: (eq.dailyCost || 0) * 30,
+        date: project.contractStartDate || new Date().toISOString().split('T')[0],
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        status: i === 0 ? 'Paid' : 'Pending',
+      })),
+    ]
+
+    return {
+      totalBudget,
+      totalSpent,
+      totalRemaining,
+      budgetUtilization,
+      categories,
+      invoices,
+    }
+  }, [project])
+
+  // Calculate monthly spending from execution plan
+  const monthlySpending = useMemo(() => {
+    if (!project?.executionPlan) {
+      return [
+        { month: 'Jan', planned: 0, actual: 0 },
+        { month: 'Feb', planned: 0, actual: 0 },
+        { month: 'Mar', planned: 0, actual: 0 },
+      ]
+    }
+
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const monthlyData = new Map<number, { planned: number; actual: number }>()
+
+    project.executionPlan.forEach(task => {
+      if (task.startDate) {
+        const month = new Date(task.startDate).getMonth()
+        const existing = monthlyData.get(month) || { planned: 0, actual: 0 }
+        const taskCost = (budgetData.totalBudget / project.executionPlan!.length)
+        existing.planned += taskCost
+        if (task.endDate && new Date(task.endDate) < new Date()) {
+          existing.actual += taskCost * 0.95
+        }
+        monthlyData.set(month, existing)
+      }
+    })
+
+    return Array.from(monthlyData.entries())
+      .sort((a, b) => a[0] - b[0])
+      .map(([month, data]) => ({
+        month: months[month],
+        planned: Math.round(data.planned),
+        actual: Math.round(data.actual),
+      }))
+  }, [project, budgetData.totalBudget])
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -101,12 +175,34 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
     }).format(value)
   }
 
-  const filteredInvoices = invoices.filter((inv) => {
+  const filteredInvoices = budgetData.invoices.filter((inv) => {
     if (activeInvoiceFilter === 'all') return true
     return inv.status.toLowerCase() === activeInvoiceFilter.toLowerCase()
   })
 
-  const maxSpending = Math.max(...monthlySpending.map((m) => Math.max(m.planned, m.actual)))
+  const maxSpending = Math.max(...monthlySpending.map((m) => Math.max(m.planned, m.actual)), 1)
+
+  if (isLoading) {
+    return (
+      <DashboardShell>
+        <TopBar title="Project Budget" />
+        <div className="flex items-center justify-center py-20">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+        </div>
+      </DashboardShell>
+    )
+  }
+
+  if (!project) {
+    return (
+      <DashboardShell>
+        <TopBar title="Project Budget" />
+        <div className="flex items-center justify-center py-20">
+          <p className="text-soft-white/60">Project not found</p>
+        </div>
+      </DashboardShell>
+    )
+  }
 
   return (
     <DashboardShell>
@@ -130,19 +226,19 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
           <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
             <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Total Budget</p>
             <p className="font-display text-2xl font-semibold text-soft-white">
-              {formatCurrency(budgetSummary.totalBudget)}
+              {formatCurrency(budgetData.totalBudget)}
             </p>
           </div>
           <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
             <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Total Spent</p>
             <p className="font-display text-2xl font-semibold text-[#FF9BB0]">
-              {formatCurrency(budgetSummary.totalSpent)}
+              {formatCurrency(budgetData.totalSpent)}
             </p>
           </div>
           <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
             <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Remaining</p>
             <p className="font-display text-2xl font-semibold text-[#63FFC9]">
-              {formatCurrency(budgetSummary.totalRemaining)}
+              {formatCurrency(budgetData.totalRemaining)}
             </p>
           </div>
           <div className="rounded-[14px] border border-[#323449] bg-surface px-5 py-4">
@@ -150,7 +246,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-2">Utilization</p>
                 <p className="font-display text-2xl font-semibold text-soft-white">
-                  {budgetSummary.budgetUtilization}%
+                  {budgetData.budgetUtilization}%
                 </p>
               </div>
               {/* Progress Ring */}
@@ -164,7 +260,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
                     fill="none"
                     stroke="#A9DFD8"
                     strokeWidth="5"
-                    strokeDasharray={`${(budgetSummary.budgetUtilization / 100) * 138} 138`}
+                    strokeDasharray={`${(budgetData.budgetUtilization / 100) * 138} 138`}
                     strokeLinecap="round"
                   />
                 </svg>
@@ -186,8 +282,8 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               </button>
             </div>
             <div className="space-y-5">
-              {budgetCategories.map((cat) => {
-                const percentUsed = Math.round((cat.spent / cat.budget) * 100)
+              {budgetData.categories.map((cat) => {
+                const percentUsed = cat.budget > 0 ? Math.round((cat.spent / cat.budget) * 100) : 0
                 const remaining = cat.budget - cat.spent
                 return (
                   <div key={cat.id} className="space-y-2">
@@ -227,11 +323,11 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               {/* Donut Chart */}
               <div className="relative h-44 w-44 mb-6">
                 <svg className="h-full w-full -rotate-90 transform" viewBox="0 0 100 100">
-                  {budgetCategories.reduce(
+                  {budgetData.categories.reduce(
                     (acc, item) => {
                       const offset = acc.offset
                       const circumference = 2 * Math.PI * 35
-                      const percent = (item.spent / budgetSummary.totalSpent) * 100
+                      const percent = budgetData.totalSpent > 0 ? (item.spent / budgetData.totalSpent) * 100 : 0
                       const strokeDasharray = (percent / 100) * circumference
                       acc.elements.push(
                         <circle
@@ -254,15 +350,15 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
                 </svg>
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   <span className="font-display text-xl font-semibold text-soft-white">
-                    {formatCurrency(budgetSummary.totalSpent)}
+                    {formatCurrency(budgetData.totalSpent)}
                   </span>
                   <span className="text-xs text-soft-white/50">Total Spent</span>
                 </div>
               </div>
               {/* Legend */}
               <div className="w-full space-y-2">
-                {budgetCategories.map((cat) => {
-                  const percent = Math.round((cat.spent / budgetSummary.totalSpent) * 100)
+                {budgetData.categories.map((cat) => {
+                  const percent = budgetData.totalSpent > 0 ? Math.round((cat.spent / budgetData.totalSpent) * 100) : 0
                   return (
                     <div key={cat.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -425,7 +521,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
           {/* Pagination */}
           <div className="flex items-center justify-between mt-6 pt-4 border-t border-[#323449]">
             <span className="text-xs text-soft-white/50">
-              Showing {filteredInvoices.length} of {invoices.length} invoices
+              Showing {filteredInvoices.length} of {budgetData.invoices.length} invoices
             </span>
             <div className="flex items-center gap-2">
               <button
@@ -462,7 +558,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-1">Total Invoices</p>
-                <p className="font-display text-xl font-semibold text-soft-white">{invoices.length}</p>
+                <p className="font-display text-xl font-semibold text-soft-white">{budgetData.invoices.length}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#A9DFD8]/10">
                 <svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 20 20" stroke="currentColor" strokeWidth="1.5">
@@ -476,7 +572,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-1">Paid</p>
                 <p className="font-display text-xl font-semibold text-[#63FFC9]">
-                  {invoices.filter((i) => i.status === 'Paid').length}
+                  {budgetData.invoices.filter((i: Invoice) => i.status === 'Paid').length}
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#63FFC9]/10">
@@ -491,7 +587,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-1">Pending</p>
                 <p className="font-display text-xl font-semibold text-[#FFE48C]">
-                  {invoices.filter((i) => i.status === 'Pending').length}
+                  {budgetData.invoices.filter((i: Invoice) => i.status === 'Pending').length}
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FFE48C]/10">
@@ -507,7 +603,7 @@ export default function ProjectBudgetPage({ params }: { params: { id: string } }
               <div>
                 <p className="text-xs uppercase tracking-[0.3em] text-soft-white/50 mb-1">Overdue</p>
                 <p className="font-display text-xl font-semibold text-[#FF9BB0]">
-                  {invoices.filter((i) => i.status === 'Overdue').length}
+                  {budgetData.invoices.filter((i: Invoice) => i.status === 'Overdue').length}
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FF9BB0]/10">

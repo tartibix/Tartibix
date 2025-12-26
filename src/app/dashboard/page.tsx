@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import DashboardShell from '@/components/dashboard/DashboardShell'
 import TopBar from '@/components/dashboard/TopBar'
 import MyDayToggle from '@/components/dashboard/MyDayToggle'
 import MyDayOverview from '@/components/dashboard/MyDayOverview'
+import Link from 'next/link'
+import { ProjectSetupData } from '@/lib/projectSetupTypes'
 
 type Project = {
 	id: string
@@ -114,14 +116,77 @@ const dashboardData = {
 
 export default function DashboardPage() {
 	const [isMyDayOn, setIsMyDayOn] = useState(false)
+	const [realProjects, setRealProjects] = useState<ProjectSetupData[]>([])
+	const [isLoading, setIsLoading] = useState(true)
+	
+	// Fetch real projects from API
+	useEffect(() => {
+		async function fetchProjects() {
+			try {
+				const response = await fetch('/api/projects')
+				if (response.ok) {
+					const data = await response.json()
+					setRealProjects(data)
+				}
+			} catch (error) {
+				console.error('Error fetching projects:', error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+		fetchProjects()
+	}, [])
+	
+	// Calculate dynamic stats from real projects
+	const companyStats: CompanyStat[] = [
+		{ label: 'On Track', value: realProjects.filter(p => p.health === 'on-track').length, color: '#5ad7c6' },
+		{ label: 'At Risk', value: realProjects.filter(p => p.health === 'watch' || p.health === 'blocked').length, color: '#ff6b6b' },
+		{ label: 'Completed', value: realProjects.filter(p => p.status === 'completed').length, color: '#6d6dfd' },
+	]
+	
+	// Get overdue tasks count from all projects
+	const overdueCount = realProjects.reduce((count, project) => {
+		if (!project.executionPlan) return count
+		const now = new Date()
+		const overdue = project.executionPlan.filter(task => {
+			if (!task.endDate) return false
+			return new Date(task.endDate) < now
+		}).length
+		return count + overdue
+	}, 0)
+	
+	// Convert real projects to display format
+	const displayProjects: Project[] = realProjects.slice(0, 4).map((p, index) => ({
+		id: String(index + 1).padStart(2, '0'),
+		name: p.projectName,
+		popularity: p.progress || 0,
+		sales: p.progress || 0,
+		status: p.status === 'completed' ? 'Approved' : p.status === 'in-progress' ? 'On going' : 'In review',
+	}))
+	
+	// Get recent tasks from projects
+	const displayTasks: Task[] = realProjects.flatMap(p => 
+		(p.executionPlan || []).slice(0, 2).map((task, index) => ({
+			id: String(index + 1).padStart(2, '0'),
+			name: `${task.taskName} - ${p.projectName}`,
+			status: new Date(task.endDate) < new Date() ? 'Over due' : 'On going',
+		}))
+	).slice(0, 4)
+	
+	// Get upcoming deadlines from projects
+	const upcomingDeadlines: Deadline[] = realProjects
+		.filter(p => p.contractEndDate)
+		.sort((a, b) => new Date(a.contractEndDate!).getTime() - new Date(b.contractEndDate!).getTime())
+		.slice(0, 3)
+		.map((p, index) => ({
+			title: `${p.projectName} (${new Date(p.contractEndDate!).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`,
+			highlight: index === 0,
+		}))
+	
 	const {
 		kpiProgress,
-		projects,
 		teamWorkload,
-		tasks,
-		deadlines,
-		companyStats,
-		taskSummary,
+		deadlines: defaultDeadlines,
 	} = dashboardData
 
 	return (
@@ -137,21 +202,85 @@ export default function DashboardPage() {
 				</section>
 			) : (
 				<section className="mt-4 flex flex-col gap-3">
-					<div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-						<KpiCard progress={kpiProgress} />
-						<OverdueCard overdueCount={taskSummary.overdue} />
-						<TeamWorkloadCard data={teamWorkload} />
-					</div>
+					{isLoading ? (
+						<div className="flex items-center justify-center py-12">
+							<div className="h-8 w-8 animate-spin rounded-full border-4 border-accent border-t-transparent" />
+						</div>
+					) : (
+						<>
+							<div className="grid gap-3 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+								<KpiCard progress={realProjects.length > 0 ? Math.round(realProjects.reduce((sum, p) => sum + (p.progress || 0), 0) / realProjects.length) : kpiProgress} />
+								<OverdueCard overdueCount={overdueCount} />
+								<TeamWorkloadCard data={teamWorkload} />
+							</div>
 
-					<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
-						<ProjectTable projects={projects} />
-						<CompanyDashboardCard stats={companyStats} />
-					</div>
+							<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+								<ProjectTable projects={displayProjects.length > 0 ? displayProjects : dashboardData.projects} />
+								<CompanyDashboardCard stats={companyStats} />
+							</div>
 
-					<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
-						<TaskTable tasks={tasks} />
-						<DeadlineCard deadlines={deadlines} />
-					</div>
+							<div className="grid gap-3 lg:grid-cols-1 xl:grid-cols-[minmax(0,2.3fr)_minmax(0,1fr)]">
+								<TaskTable tasks={displayTasks.length > 0 ? displayTasks : dashboardData.tasks} />
+								<DeadlineCard deadlines={upcomingDeadlines.length > 0 ? upcomingDeadlines : defaultDeadlines} />
+							</div>
+							
+							{/* Quick Links */}
+							<div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+								<Link href="/dashboard/projects" className="rounded-2xl border border-[#2F303A] bg-surface p-4 transition hover:border-accent/50 hover:shadow-[0_0_10px_rgba(169,223,216,0.2)]">
+									<div className="flex items-center gap-3">
+										<div className="rounded-full bg-accent/10 p-2">
+											<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+											</svg>
+										</div>
+										<div>
+											<p className="font-semibold text-soft-white">Projects</p>
+											<p className="text-xs text-soft-white/60">{realProjects.length} active</p>
+										</div>
+									</div>
+								</Link>
+								<Link href="/dashboard/tasks" className="rounded-2xl border border-[#2F303A] bg-surface p-4 transition hover:border-accent/50 hover:shadow-[0_0_10px_rgba(169,223,216,0.2)]">
+									<div className="flex items-center gap-3">
+										<div className="rounded-full bg-accent/10 p-2">
+											<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+											</svg>
+										</div>
+										<div>
+											<p className="font-semibold text-soft-white">Tasks</p>
+											<p className="text-xs text-soft-white/60">{realProjects.reduce((sum, p) => sum + (p.executionPlan?.length || 0), 0)} total</p>
+										</div>
+									</div>
+								</Link>
+								<Link href="/dashboard/recources" className="rounded-2xl border border-[#2F303A] bg-surface p-4 transition hover:border-accent/50 hover:shadow-[0_0_10px_rgba(169,223,216,0.2)]">
+									<div className="flex items-center gap-3">
+										<div className="rounded-full bg-accent/10 p-2">
+											<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+											</svg>
+										</div>
+										<div>
+											<p className="font-semibold text-soft-white">Resources</p>
+											<p className="text-xs text-soft-white/60">{realProjects.reduce((sum, p) => sum + (p.employees?.length || 0), 0)} team members</p>
+										</div>
+									</div>
+								</Link>
+								<Link href="/dashboard/time-log" className="rounded-2xl border border-[#2F303A] bg-surface p-4 transition hover:border-accent/50 hover:shadow-[0_0_10px_rgba(169,223,216,0.2)]">
+									<div className="flex items-center gap-3">
+										<div className="rounded-full bg-accent/10 p-2">
+											<svg className="h-5 w-5 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+											</svg>
+										</div>
+										<div>
+											<p className="font-semibold text-soft-white">Time Log</p>
+											<p className="text-xs text-soft-white/60">Track hours</p>
+										</div>
+									</div>
+								</Link>
+							</div>
+						</>
+					)}
 				</section>
 			)}
 		</DashboardShell>

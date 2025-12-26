@@ -44,6 +44,20 @@ export type TeamHierarchyMember = {
 }
 
 const initiativeOptions: CreateDropdownOption[] = [
+  // Construction & Building Projects
+  { value: 'building', label: 'Building Construction', description: 'Commercial, residential, or mixed-use building projects' },
+  { value: 'infrastructure', label: 'Infrastructure', description: 'Roads, bridges, utilities, and public infrastructure' },
+  { value: 'industrial', label: 'Industrial', description: 'Factories, warehouses, and industrial facilities' },
+  { value: 'residential', label: 'Residential', description: 'Housing developments and residential complexes' },
+  { value: 'commercial', label: 'Commercial', description: 'Office buildings, retail spaces, and commercial centers' },
+  { value: 'healthcare', label: 'Healthcare', description: 'Hospitals, clinics, and medical facilities' },
+  { value: 'education', label: 'Education', description: 'Schools, universities, and training centers' },
+  { value: 'transportation', label: 'Transportation', description: 'Airports, ports, railways, and transit systems' },
+  { value: 'water-wastewater', label: 'Water & Wastewater', description: 'Water treatment plants and distribution systems' },
+  { value: 'power-energy', label: 'Power & Energy', description: 'Power plants, substations, and energy facilities' },
+  { value: 'oil-gas', label: 'Oil & Gas', description: 'Refineries, pipelines, and petrochemical plants' },
+  { value: 'telecommunications', label: 'Telecommunications', description: 'Network infrastructure and data centers' },
+  // Legacy options for existing data
   { value: 'website-redesign', label: 'Website Redesign', description: 'Rebuild marketing and product pages in one sprint' },
   { value: 'mobile-refresh', label: 'Mobile App Refresh', description: 'Redesign navigation and onboarding flows' },
   { value: 'intranet-upgrade', label: 'Intranet Upgrade', description: 'Upgrade legacy knowledge base to new stack' },
@@ -52,11 +66,15 @@ const initiativeOptions: CreateDropdownOption[] = [
 ]
 
 const templateOptions: CreateDropdownOption[] = [
-  { value: 'blank', label: 'Blank Blueprint' },
-  { value: 'product-launch', label: 'Product Launch' },
-  { value: 'process-optimization', label: 'Process Optimization' },
-  { value: 'governance-pack', label: 'Governance Pack' },
-  { value: 'other', label: 'Other' },
+  { value: 'blank', label: 'Blank Blueprint', description: 'Start from scratch' },
+  { value: 'construction-standard', label: 'Construction Standard', description: 'Standard construction project template' },
+  { value: 'design-build', label: 'Design-Build', description: 'Integrated design and construction' },
+  { value: 'epc', label: 'EPC Project', description: 'Engineering, Procurement, Construction' },
+  { value: 'renovation', label: 'Renovation', description: 'Building renovation and retrofit' },
+  { value: 'product-launch', label: 'Product Launch', description: 'Product development workflow' },
+  { value: 'process-optimization', label: 'Process Optimization', description: 'Efficiency improvement project' },
+  { value: 'governance-pack', label: 'Governance Pack', description: 'Compliance and governance template' },
+  { value: 'other', label: 'Other', description: 'Custom template' },
 ]
 
 const documentItems: CreateDocumentItem[] = [

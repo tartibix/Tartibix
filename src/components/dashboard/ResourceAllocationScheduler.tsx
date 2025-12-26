@@ -4,20 +4,20 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 
 const dayLabels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'] as const
 
-type ProjectKey = 'Project A' | 'Project B' | 'Project C'
-type ProjectFilterValue = 'Project All' | ProjectKey
-
-type Allocation = {
+type ProjectAllocation = {
 	id: string
-	project: ProjectKey
+	project: string
+	projectName: string
 	startDay: number
 	spanDays: number
+	color: string
 }
 
 type ScheduleRow = {
 	id: string
 	employee: string
-	allocations: Allocation[]
+	employeeCode?: string
+	allocations: ProjectAllocation[]
 }
 
 type FilterId = 'project' | 'range' | 'resource'
@@ -33,90 +33,21 @@ type FilterGroup = {
 	options: FilterOption[]
 }
 
-const projectPalette: Record<ProjectKey, { fill: string; shadow: string; text: string }> = {
-	'Project A': {
-		fill: 'rgba(225, 211, 182, 0.48)',
-		shadow: '0 0 10px rgba(225, 211, 182, 0.2)',
-		text: '#F6F6F6',
-	},
-	'Project B': {
-		fill: 'rgba(177, 192, 193, 0.48)',
-		shadow: '0 0 10px rgba(177, 192, 193, 0.18)',
-		text: '#F6F6F6',
-	},
-	'Project C': {
-		fill: 'rgba(195, 201, 178, 0.48)',
-		shadow: '0 0 10px rgba(195, 201, 178, 0.18)',
-		text: '#F6F6F6',
-	},
-}
+// Color palette for projects
+const projectColors = [
+	{ fill: 'rgba(169, 223, 216, 0.48)', shadow: '0 0 10px rgba(169, 223, 216, 0.2)', text: '#F6F6F6' },
+	{ fill: 'rgba(225, 211, 182, 0.48)', shadow: '0 0 10px rgba(225, 211, 182, 0.2)', text: '#F6F6F6' },
+	{ fill: 'rgba(177, 192, 193, 0.48)', shadow: '0 0 10px rgba(177, 192, 193, 0.18)', text: '#F6F6F6' },
+	{ fill: 'rgba(195, 201, 178, 0.48)', shadow: '0 0 10px rgba(195, 201, 178, 0.18)', text: '#F6F6F6' },
+	{ fill: 'rgba(200, 182, 225, 0.48)', shadow: '0 0 10px rgba(200, 182, 225, 0.2)', text: '#F6F6F6' },
+	{ fill: 'rgba(225, 182, 193, 0.48)', shadow: '0 0 10px rgba(225, 182, 193, 0.2)', text: '#F6F6F6' },
+]
 
 const totalDays = dayLabels.length
 
-const baseScheduleRows: ScheduleRow[] = [
-	{
-		id: 'row-emily',
-		employee: 'Emily',
-		allocations: [
-			{ id: 'emily-a', project: 'Project A', startDay: 0, spanDays: 2 },
-			{ id: 'emily-b', project: 'Project B', startDay: 1.5, spanDays: 2 },
-			{ id: 'emily-c', project: 'Project C', startDay: 3, spanDays: 2 },
-		],
-	},
-	{
-		id: 'row-james',
-		employee: 'James',
-		allocations: [
-			{ id: 'james-a', project: 'Project A', startDay: 0, spanDays: 1.5 },
-			{ id: 'james-b', project: 'Project B', startDay: 0.5, spanDays: 2 },
-			{ id: 'james-c', project: 'Project C', startDay: 2, spanDays: 3 },
-		],
-	},
-	{
-		id: 'row-anna',
-		employee: 'Anna',
-		allocations: [
-			{ id: 'anna-a', project: 'Project A', startDay: 0, spanDays: 3 },
-			{ id: 'anna-b', project: 'Project B', startDay: 2, spanDays: 1.5 },
-			{ id: 'anna-c', project: 'Project C', startDay: 2.5, spanDays: 2.5 },
-		],
-	},
-	{
-		id: 'row-michael',
-		employee: 'Michael',
-		allocations: [
-			{ id: 'michael-a', project: 'Project A', startDay: 0, spanDays: 2.5 },
-			{ id: 'michael-b', project: 'Project B', startDay: 1, spanDays: 2 },
-			{ id: 'michael-c', project: 'Project C', startDay: 1.5, spanDays: 2 },
-			{ id: 'michael-d', project: 'Project A', startDay: 3.5, spanDays: 1.5 },
-		],
-	},
-]
-
-type RangeFilterValue = 'Day' | 'Week' | 'Month'
-
-const scheduleByRange: Record<RangeFilterValue, ScheduleRow[]> = {
-	Day: baseScheduleRows.map(row => ({
-		...row,
-		allocations: row.allocations.map(allocation =>
-			allocation.project === 'Project A'
-				? { ...allocation, spanDays: Math.min(1.5, allocation.spanDays) }
-				: { ...allocation, spanDays: Math.max(0.4, allocation.spanDays - 0.6), startDay: Math.max(allocation.startDay, 3.2) }
-		),
-	})),
-	Week: baseScheduleRows,
-	Month: baseScheduleRows.map(row => ({
-		...row,
-		allocations: row.allocations.map(allocation => ({
-			...allocation,
-			spanDays: Math.min(totalDays - allocation.startDay, allocation.spanDays + 0.3),
-		})),
-	})),
-}
-
-function buildAllocationLanes(allocations: Allocation[]): Allocation[][] {
+function buildAllocationLanes(allocations: ProjectAllocation[]): ProjectAllocation[][] {
 	const sorted = [...allocations].sort((a, b) => a.startDay - b.startDay)
-	const lanes: Allocation[][] = []
+	const lanes: ProjectAllocation[][] = []
 
 	sorted.forEach(allocation => {
 		let placed = false
@@ -137,19 +68,9 @@ function buildAllocationLanes(allocations: Allocation[]): Allocation[][] {
 	return lanes
 }
 
-const filterGroups: FilterGroup[] = [
+// Static filter groups for range and resource type
+const staticFilterGroups: Omit<FilterGroup, 'id'>[] = [
 	{
-		id: 'project',
-		defaultValue: 'Project All',
-		options: [
-			{ value: 'Project All', label: 'Project All' },
-			{ value: 'Project A', label: 'Project A' },
-			{ value: 'Project B', label: 'Project B' },
-			{ value: 'Project C', label: 'Project C' },
-		],
-	},
-	{
-		id: 'range',
 		defaultValue: 'Week',
 		options: [
 			{ value: 'Day', label: 'Day' },
@@ -158,27 +79,109 @@ const filterGroups: FilterGroup[] = [
 		],
 	},
 	{
-		id: 'resource',
-		defaultValue: 'equipment',
+		defaultValue: 'all',
 		options: [
-			{ value: 'equipment', label: 'equipment' },
-			{ value: 'staff', label: 'staff' },
-			{ value: 'budget', label: 'budget' },
+			{ value: 'all', label: 'All Resources' },
+			{ value: 'employees', label: 'Employees' },
+			{ value: 'equipment', label: 'Equipment' },
 		],
 	},
 ]
 
-export default function ResourceAllocationScheduler() {
-	const [selectedFilters, setSelectedFilters] = useState<Record<FilterId, string>>(() =>
-		filterGroups.reduce<Record<FilterId, string>>((acc, group) => {
-			acc[group.id] = group.defaultValue
-			return acc
-		}, {} as Record<FilterId, string>),
-	)
+type ProjectData = {
+	projectId: string
+	projectName: string
+	employees?: { id: string; employeeCode: string; jobTitle: string }[]
+}
 
-	const selectedRange = selectedFilters.range as RangeFilterValue
-	const activeProject = selectedFilters.project as ProjectFilterValue
-	const rows = useMemo(() => scheduleByRange[selectedRange] ?? baseScheduleRows, [selectedRange])
+export default function ResourceAllocationScheduler() {
+	const [projects, setProjects] = useState<ProjectData[]>([])
+	const [isLoading, setIsLoading] = useState(true)
+	const [filterGroups, setFilterGroups] = useState<FilterGroup[]>([])
+	const [selectedFilters, setSelectedFilters] = useState<Record<FilterId, string>>({
+		project: 'All Projects',
+		range: 'Week',
+		resource: 'all',
+	})
+
+	// Fetch projects from API
+	useEffect(() => {
+		async function fetchProjects() {
+			try {
+				const res = await fetch('/api/projects')
+				if (res.ok) {
+					const data = await res.json()
+					setProjects(data.projects || [])
+					
+					// Build project filter options
+					const projectOptions: FilterOption[] = [
+						{ value: 'All Projects', label: 'All Projects' },
+						...(data.projects || []).map((p: ProjectData) => ({
+							value: p.projectId,
+							label: p.projectName
+						}))
+					]
+					
+					setFilterGroups([
+						{ id: 'project', defaultValue: 'All Projects', options: projectOptions },
+						{ id: 'range', defaultValue: 'Week', options: staticFilterGroups[0].options },
+						{ id: 'resource', defaultValue: 'all', options: staticFilterGroups[1].options },
+					])
+				}
+			} catch (error) {
+				console.error('Error fetching projects:', error)
+			} finally {
+				setIsLoading(false)
+			}
+		}
+		fetchProjects()
+	}, [])
+
+	// Build schedule rows from project employees
+	const rows = useMemo((): ScheduleRow[] => {
+		const employeeMap = new Map<string, ScheduleRow>()
+		
+		projects.forEach((project, projectIndex) => {
+			const color = projectColors[projectIndex % projectColors.length]
+			
+			project.employees?.forEach((employee, empIndex) => {
+				const existingRow = employeeMap.get(employee.employeeCode)
+				const allocation: ProjectAllocation = {
+					id: `${project.projectId}-${employee.employeeCode}`,
+					project: project.projectId,
+					projectName: project.projectName,
+					startDay: (empIndex % totalDays) * 0.5 + projectIndex * 0.3,
+					spanDays: 1.5 + Math.random() * 1.5,
+					color: color.fill,
+				}
+
+				if (existingRow) {
+					existingRow.allocations.push(allocation)
+				} else {
+					employeeMap.set(employee.employeeCode, {
+						id: `row-${employee.employeeCode}`,
+						employee: employee.jobTitle,
+						employeeCode: employee.employeeCode,
+						allocations: [allocation],
+					})
+				}
+			})
+		})
+
+		return Array.from(employeeMap.values()).slice(0, 8) // Limit to 8 rows for visibility
+	}, [projects])
+
+	const activeProject = selectedFilters.project
+
+	if (isLoading) {
+		return (
+			<section className="rounded-[30px] border border-[#2F303A] bg-[#21222D] px-7 py-8 shadow-[0_0_6px_rgba(169,223,216,0.2)] sm:px-9 sm:py-10">
+				<div className="flex items-center justify-center py-12">
+					<div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent" />
+				</div>
+			</section>
+		)
+	}
 
 	return (
 		<section className="rounded-[30px] border border-[#2F303A] bg-[#21222D] px-7 py-8 shadow-[0_0_6px_rgba(169,223,216,0.2)] sm:px-9 sm:py-10">
@@ -203,7 +206,7 @@ export default function ResourceAllocationScheduler() {
 
 			<div className="mt-10 rounded-[26px] border border-[#323449] bg-[#1A1B24] px-6 py-9 shadow-[0_0_6px_rgba(169,223,216,0.18)] sm:px-9 sm:py-10">
 				<div className="grid grid-cols-[160px_1fr] items-end gap-6">
-					<span className="font-display text-[22px] font-medium text-soft-white">Employees</span>
+					<span className="font-display text-[22px] font-medium text-soft-white">Resources</span>
 					<div className="grid flex-1 grid-cols-5 text-center">
 						{dayLabels.map(day => (
 							<span key={day} className="font-display text-[18px] font-medium text-soft-white">
@@ -215,17 +218,29 @@ export default function ResourceAllocationScheduler() {
 
 				<div className="mt-6 h-px w-full bg-white/12" />
 
-				<div className="space-y-9">
-					{rows.map((row, index) => (
-						<div
-							key={row.id}
-							className={`grid grid-cols-[160px_1fr] items-center gap-6 pt-8 ${index !== 0 ? 'border-t border-white/10' : ''}`}
-						>
-							<span className="font-display text-[18px] font-semibold text-soft-white">{row.employee}</span>
-							<AllocationRow allocations={row.allocations} activeProject={activeProject} />
-						</div>
-					))}
-				</div>
+				{rows.length === 0 ? (
+					<div className="py-12 text-center">
+						<p className="text-soft-white/60">No resources found</p>
+						<p className="text-sm text-soft-white/40 mt-1">Add employees to projects to see their allocations</p>
+					</div>
+				) : (
+					<div className="space-y-9">
+						{rows.map((row, index) => (
+							<div
+								key={row.id}
+								className={`grid grid-cols-[160px_1fr] items-center gap-6 pt-8 ${index !== 0 ? 'border-t border-white/10' : ''}`}
+							>
+								<div>
+									<span className="font-display text-[18px] font-semibold text-soft-white block">{row.employee}</span>
+									{row.employeeCode && (
+										<span className="text-xs text-soft-white/50">{row.employeeCode}</span>
+									)}
+								</div>
+								<AllocationRow allocations={row.allocations} activeProject={activeProject} />
+							</div>
+						))}
+					</div>
+				)}
 			</div>
 		</section>
 	)
@@ -305,8 +320,8 @@ function FilterDropdown({ group, value, onSelect }: FilterDropdownProps) {
 }
 
 type AllocationRowProps = {
-	allocations: Allocation[]
-	activeProject: ProjectFilterValue
+	allocations: ProjectAllocation[]
+	activeProject: string
 }
 
 function AllocationRow({ allocations, activeProject }: AllocationRowProps) {
@@ -314,7 +329,7 @@ function AllocationRow({ allocations, activeProject }: AllocationRowProps) {
 	const laneHeight = 40
 	const laneGap = 12
 	const verticalPadding = 16
-	const containerHeight = lanes.length * laneHeight + Math.max(0, lanes.length - 1) * laneGap + verticalPadding * 2
+	const containerHeight = Math.max(72, lanes.length * laneHeight + Math.max(0, lanes.length - 1) * laneGap + verticalPadding * 2)
 
 	return (
 		<div
@@ -334,11 +349,10 @@ function AllocationRow({ allocations, activeProject }: AllocationRowProps) {
 					{lanes.map((lane, laneIndex) => (
 						<div key={laneIndex} className="relative w-full" style={{ height: laneHeight }}>
 							{lane.map(allocation => {
-								const palette = projectPalette[allocation.project]
 								const clampedSpan = Math.min(allocation.spanDays, totalDays - allocation.startDay)
 								const leftPercent = (allocation.startDay / totalDays) * 100
 								const widthPercent = (clampedSpan / totalDays) * 100
-								const dimmed = activeProject !== 'Project All' && allocation.project !== activeProject
+								const dimmed = activeProject !== 'All Projects' && allocation.project !== activeProject
 
 								return (
 									<div
@@ -349,12 +363,15 @@ function AllocationRow({ allocations, activeProject }: AllocationRowProps) {
 										style={{
 											left: `${leftPercent}%`,
 											width: `${widthPercent}%`,
-											backgroundColor: palette.fill,
-											boxShadow: palette.shadow,
-											color: palette.text,
+											backgroundColor: allocation.color,
+											boxShadow: '0 0 10px rgba(169, 223, 216, 0.15)',
+											color: '#F6F6F6',
 										}}
+										title={allocation.projectName}
 									>
-										{allocation.project}
+										{allocation.projectName.length > 15 
+											? allocation.projectName.substring(0, 15) + '...' 
+											: allocation.projectName}
 									</div>
 								)
 							})}
